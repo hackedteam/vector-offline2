@@ -92,6 +92,8 @@
 	$ apt-get install gnome-icon-theme-symbolic
 	$ apt-get install fluxbox
 
+	$ echo "blacklist b43" | sudo tee -a /etc/modprobe.d/blacklist-b43.conf
+
 	$ echo "FRAMEBUFFER=y" > /etc/initramfs-tools/conf.d/splash
 	$ update-initramfs -u -k all
 
