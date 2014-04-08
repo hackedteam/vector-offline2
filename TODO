@@ -1,7 +1,8 @@
 TODO Offline Install:
 =====================
-
+	- b43.allhwsupport su macbook bianco
+	- Macbook bianco non si riavvia
+	- Kernel message redirect to /dev/null
+	- Ottenere i full names degli utenti dei sistemi operativi
         - Quando monto HFS+ con ufsd, non riesco a leggere i contenuti di molti file
-        - Lo splash screen di Linux sui macbook 13 si visualizza ma senza logo grafico
-        - Ottenere i full names degli utenti dei sistemi operativi
         - Scrivere l'applicazione di infezione mac e linux per OS Linux
