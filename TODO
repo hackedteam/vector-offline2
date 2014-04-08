@@ -1,6 +1,6 @@
 TODO Offline Install:
 =====================
-	- b43.allhwsupport su macbook bianco
+	- b43.allhwsupport=1 su macbook bianco
 	- Macbook bianco non si riavvia
 	- Kernel message redirect to /dev/null
 	- Ottenere i full names degli utenti dei sistemi operativi
