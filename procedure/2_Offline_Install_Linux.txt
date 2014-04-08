@@ -282,6 +282,66 @@
 
 	SALVA ED ESCI DAL FILE
 
+	$ vi failsafe.conf
+
+	SOSTITUISCI:
+
+	console output
+
+	CON:
+
+	console none
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi plymouth-upstart-bridge.conf
+
+	SOSTITUISCI:
+
+	console output
+
+	CON:
+
+	console none
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi rc-sysinit.conf
+
+	SOSTITUISCI:
+
+	console output
+
+	CON:
+
+	console none
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi rc.conf
+
+	SOSTITUISCI:
+
+	console output
+
+	CON:
+
+	console none
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi ufw.conf
+
+	SOSTITUISCI:
+
+	console output
+
+	CON:
+
+	console none
+
+	SALVA ED ESCI DAL FILE
+
 	$ update-initramfs -u -k all
 	$ update-grub
 
