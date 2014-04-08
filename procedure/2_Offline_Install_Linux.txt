@@ -92,6 +92,9 @@
 	$ apt-get install gnome-icon-theme-symbolic
 	$ apt-get install fluxbox
 
+	$ echo "FRAMEBUFFER=y" > /etc/initramfs-tools/conf.d/splash
+	$ update-initramfs -u -k all
+
 	COPIARE LA CONFIGURAZIONE fluxbox.tar.gz in /opt
 
 	$ cd /opt
