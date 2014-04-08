@@ -371,15 +371,15 @@ class OfflineInstall(object):
 
 		self.tabosx.update({'osversion': osversion})
 
-		if osversion == "10.5":
+		if osversion.find("10.5") != -1:
 			oscode = "Leopard"
-		elif osversion == "10.6":
+		elif osversion.find("10.6") != -1:
 			oscode = "Snow Leopard"
-		elif osversion == "10.7":
+		elif osversion.find("10.7") != -1:
 			oscode = "Lion"
-		elif osversion == "10.8":
+		elif osversion.find("10.8") != -1:
 			oscode = "Mountain Lion"
-		elif osversion == "10.9":
+		elif osversion.find("10.9") != -1:
 			oscode = "Mavericks"
 
 		self.tabosx.update({'oscode': oscode})
@@ -393,7 +393,7 @@ class OfflineInstall(object):
 		self.tabosx.update({'osname': osname})
 		self.tabosx.update({'osarch': osarch})
 
-		if osversion == "10.5" or osversion == "10.6" or osversion == "10.7" or osversion == "10.8" or osversion == "10.9":
+		if osversion.find("10.5" or "10.6" or "10.7" or "10.8" or "10.9") != -1:
 			ossupport = True
 
 		self.tabosx.update({'ossupport': ossupport})
