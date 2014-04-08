@@ -1,0 +1,9 @@
+Hello Andrea, What I meant is, on the native 'hfsplus' driver, by adding '/rsrc' at the end of the file name and looking at it as if it was a directory, you may be able to get the actual contents of a seemingly empty file: 
+
+root@fsd-linux-lic-bs-01:~# ls -l /mnt/test/Applications/Automator.app/Contents/MacOS/Automator 
+-rwxr-xr-x 1 root root 0 Mar 17 16:05 /mnt/test/Applications/Automator.app/Contents/MacOS/Automator 
+
+root@fsd-linux-lic-bs-01:~# ls -l /mnt/test/Applications/Automator.app/Contents/MacOS/Automator/rsrc 
+-rwxr-xr-x 1 root root 123879 Mar 17 16:05 /mnt/test/Applications/Automator.app/Contents/MacOS/Automator/rsrc 
+
+However, we can't guarantee it that will work every time.
