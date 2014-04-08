@@ -1,0 +1,463 @@
+1) Aggiornare il sistema:
+
+	$ apt-get update
+	$ apt-get upgrade
+
+2) Installare i driver Paragon UFSD (fino a kernel 3.11):
+
+	$ mkdir ufsd
+	$ cd ufsd
+	$ tar -xvzf Paragon-147-FRE_NTFS_Linux_8.9.0_Express.tar.gz
+	$ sudo ./install.sh
+	$ cd ..
+
+	Per verificare la posizione dei file:
+
+	$ sudo updatedb
+	$ locate ufsd
+
+3) Iniziare a creare la ISO di ubuntu:
+
+	$ cd
+	$ sudo apt-get install debootstrap
+	$ mkdir -p work/chroot
+	$ cd work
+	$ sudo debootstrap --arch=i386 saucy chroot
+
+		Esempio:
+
+		$ARCH = i386, x86_64
+		$RELEASE = saucy (13.10)
+
+		I nome delle release si trovano in /usr/share/debootstrap/scripts/
+
+	IN QUESTI FILE CONTROLLARE IL LORO CONTENUTO ED OVVIAMENTE, ADATTARLI ALL'INSTALLAZIONE
+
+	$ sudo mount --bind /dev chroot/dev
+	$ sudo cp /etc/hosts chroot/etc/hosts
+	$ sudo cp /etc/resolv.conf chroot/etc/resolv.conf
+	$ sudo cp /etc/apt/sources.list chroot/etc/apt/sources.list
+
+	UTILIZZARE COME $KERNEL_VERSION QUELLA USATA DAL SISTEMA UBUNTU IN ESECUZIONE
+
+	$ mkdir -p chroot/lib/modules/$KERNEL_VERSION/kernel/external/ufsd
+	$ cp /lib/modules/$KERNEL_VERSION/kernel/external/ufsd/* chroot/lib/modules/$KERNEL_VERSION/kernel/external/ufsd/
+
+	$ sudo chroot chroot
+	$ mount none -t proc /proc
+	$ mount none -t sysfs /sys
+	$ mount none -t devpts /dev/pts
+	$ export HOME=/root
+	$ export LC_ALL=C
+
+	$ apt-get update
+	$ apt-get install --yes dbus
+	$ dbus-uuidgen > /var/lib/dbus/machine-id
+	$ dpkg-divert --local --rename --add /sbin/initctl
+	$ ln -s /bin/true /sbin/initctl
+	$ apt-get --yes upgrade
+	$ apt-get install --yes ubuntu-standard casper lupin-casper
+	$ apt-get install --yes discover laptop-detect os-prober
+	$ apt-get install --yes linux-generic
+
+	SU GRUB INSTALL, SELEZIONARE TUTTI I DISCHI
+
+	VERIFICARE CHE I DRIVER UFSD CHE ABBIAMO INSTALLATO SI TROVINO EFFETTIVAMENTE
+	NELLA CONFIGURAZIONE DEL KERNEL APPENA INSTALLATO, QUINDI CONTROLLARE:
+
+	/lib/modules/$KERNEL_VERSION/kernel/external/ufsd/
+
+	E CHE $KERNEL_VERSION SIA QUELLA INSTALLATA. SE E' UN'ALTRA VERSIONE, SPOSTARE LA DIRECTORY:
+
+	/lib/modules/$KERNEL_VERSION_OLD/kernel/external/ufsd/
+
+	IN:
+
+	/lib/modules/$KERNEL_VERSION_CURRENT/kernel/external/
+
+	$ depmod -a $KERNEL_VERSION_CURRENT
+	$ update-initramfs -u -k all
+
+	$ apt-get install firmware-b43-installer
+	$ apt-get install linux-firmware-nonfree
+	$ apt-get install firmware-b43legacy-installer
+	$ apt-get install xinit
+	$ apt-get install xauth
+	$ apt-get install v86d
+	$ apt-get install nvidia-current
+	$ apt-get install plymouth-x11
+	$ apt-get install plymouth-theme-ubuntu-logo
+	$ apt-get install libgtk-3-dev
+	$ apt-get install lightdm-gtk-greeter
+	$ apt-get install gnome-icon-theme-symbolic
+	$ apt-get install fluxbox
+
+	COPIARE LA CONFIGURAZIONE fluxbox.tar.gz in /opt
+
+	$ cd /opt
+	$ tar -xvzf fluxbox.tar.gz
+	$ rm fluxbox.tar.gz
+	$ mv .fluxbox fluxbox
+
+	$ vim /etc/rc.local
+
+	PRIMA DI exit 0 INSERIRE:
+
+	cp -aRf /opt/fluxbox /home/offline/.fluxbox
+	echo "exec startfluxbox" > /home/offline/.xinitrc
+
+	COPIARE LA CONFIGURAZIONE offline-install.tar.gz /opt
+
+	$ cd /opt
+	$ tar -xvzf offline-install.tar.gz
+	$ rm offline-install.tar.gz
+	$ chmod +x /opt/offline-install/offline_gui.py
+
+	<< A QUESTO PUNTO QUI BISOGNA INSTALLARE TRAMITE APT I SOFTWARE NECESSARI ALL'OFFLINE INSTALLER >>
+
+	$ vi /etc/default/grub
+
+	MODIFCA LE LINEE:
+
+	GRUB_HIDDEN_TIMEOUT=3
+	...
+	GRUB_TIMEOUT=10
+
+	IN:
+
+	GRUB_HIDDEN_TIMEOUT=0
+	...
+	GRUB_TIMEOUT=0
+
+	SALVA ED ESCI DAL FILE
+
+	$ update-grub
+
+	$ vi /etc/init/rc-sysinit.conf
+
+	MODIFICA LA LINEA:
+
+	start on (filesystem and static-network-up) or failsafe-boot
+
+	IN
+
+	start on (filesystem) or failsafe-boot
+
+	SALVA ED ESCI DAL FILE
+
+	MODIFICA IL FILE:
+
+	$ vi /etc/lightdm/lightdm.conf
+
+	DA:
+
+	[SeatDefaults]
+	greeter-session=lightdm-gtk-greeter
+
+	A:
+
+	[SeatDefaults]
+	autologin-user=offline
+	autologin-user-timeout=0
+	user-session=fluxbox
+	greeter-session=lightdm-gtk-greeter
+	
+	SALVA ED ESCI DAL FILE
+
+	$ nano /etc/rc0.d/S89casper
+
+	PRIMA DELLE RIGHE:
+
+	# XXX - i18n
+	MSG="Please remove installation media and close the tray (if any) then press ENTER: "
+
+	INSERIRE:
+
+	eject -p -m $device >/dev/null 2>&1
+	sleep 5
+	return 0
+
+	SALVA ED ESCI DAL FILE
+
+	$ nano /etc/rc6.d/S89casper
+
+	PRIMA DELLE RIGHE:
+
+	# XXX - i18n
+	MSG="Please remove installation media and close the tray (if any) then press ENTER: "
+
+	INSERIRE:
+
+	eject -p -m $device >/dev/null 2>&1
+	sleep 5
+	return 0
+
+	SALVA ED ESCI DAL FILE
+	
+	$ sudo update-initramfs -u -k all
+
+	$ sudo apt-get install rcconf
+	$ sudo rcconf
+
+	SELEZIONARE SOLTATO: casper, grub-common, sudo, x11-common
+	TUTTI GLI ALTRI DESELEZIONATI, INFINE ANDARE SU OK
+
+	$ cd /etc/init/
+	$ vi network-interface-security.conf
+
+	SOSTITUISCI:
+
+	start on (starting network-interface
+          or starting network-manager
+          or starting networking)
+	stop on (stopped network-interface JOB=$JOB INTERFACE=$INTERFACE
+          or stopped network-manager JOB=$JOB
+          or stopped networking JOB=$JOB)
+
+	CON:
+
+	start on runlevel [!0123456]
+	stop on runlevel [!0123456]
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi ufw.conf
+
+	SOSTITUISCI:
+
+	start on (starting network-interface
+          or starting network-manager
+          or starting networking)
+	stop on runlevel [!023456]
+
+	CON:
+
+	start on runlevel [!0123456]
+	stop on runlevel [!0123456]
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi network-interface.conf
+
+	SOSTITUISCI:
+
+	start on net-device-added
+	stop on net-device-removed INTERFACE=$INTERFACE
+
+	CON:
+
+	start on runlevel [!0123456]
+	stop on runlevel [!0123456]
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi mountall-net.conf
+
+	SOSTITUISCI:
+
+	start on net-device-up
+
+	CON:
+
+	start on runlevel [!0123456]
+	stop on runlevel [!0123456]
+
+	SALVA ED ESCI DAL FILE
+
+	$ vi networking.conf
+
+	SOSTITUISCI:
+
+	start on (local-filesystems
+          and (stopped udevtrigger or container)) or runlevel [2345]
+	stop on unmounted-remote-filesystems
+
+	CON:
+
+	start on runlevel [!0123456]
+	stop on runlevel [!0123456]
+
+	SALVA ED ESCI DAL FILE
+
+	$ update-initramfs -u -k all
+	$ update-grub
+
+	$ cd
+	$ rm /var/lib/dbus/machine-id
+	$ rm /sbin/initctl
+	$ dpkg-divert --rename --remove /sbin/initctl
+	$ apt-get clean
+	$ rm -rf /tmp/*
+	$ rm /etc/resolv.conf
+	$ rm -Rf /root/.ssh/
+	$ umount -lf /proc
+	$ umount -lf /sys
+	$ umount -lf /dev/pts
+	$ exit
+	$ sudo umount /path/to/chroot/dev
+
+	$ sudo apt-get install syslinux squashfs-tools genisoimage
+	$ mkdir -p image/{casper,isolinux}
+	$ cp chroot/boot/vmlinuz-$KERNEL_VERSION-generic image/casper/vmlinuz
+	$ cp chroot/boot/initrd.img-$KERNEL_VERSION-generic image/casper/initrd.lz
+	$ cp /usr/lib/syslinux/isolinux.bin image/isolinux/
+
+	$ touch image/isolinux/isolinux.cfg
+	$ sudo apt-get install vim
+	$ vim image/isolinux/isolinux.cfg
+
+		TIMEOUT 1
+		PROMPT 0
+		NOESCAPE 1 
+		DEFAULT offline
+		LABEL offline
+		  menu label ^Start Offline Install
+		  kernel /casper/vmlinuz
+		  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- 
+
+	SE SI USA XBOOT, MODIFICARE:
+
+	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+
+	CON:
+
+	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- iso-scan/filename=/images/<name>.iso
+
+ 	CON <name>.iso IN NOME FINALE DELLA ISO DUAL BOOT CON MKISOFS.iso OVVERO offlineinstalllin
+
+	$ sudo chroot chroot dpkg-query -W --showformat='${Package} ${Version}\n' | sudo tee image/casper/filesystem.manifest
+sudo cp -v image/casper/filesystem.manifest image/casper/filesystem.manifest-desktop
+REMOVE='ubiquity ubiquity-frontend-gtk ubiquity-frontend-kde casper lupin-casper live-initramfs user-setup discover1 xresprobe os-prober libdebian-installer4'
+for i in $REMOVE 
+do
+        sudo sed -i "/${i}/d" image/casper/filesystem.manifest-desktop
+done
+
+	$ sudo mksquashfs chroot image/casper/filesystem.squashfs
+	$ printf $(sudo du -sx --block-size=1 chroot | cut -f1) > image/casper/filesystem.size
+	$ nano image/README.diskdefines
+
+		#define DISKNAME  Offline Install
+		#define TYPE  binary
+		#define TYPEbinary  1
+		#define ARCH  i386
+		#define ARCHi386  1
+		#define DISKNUM  1
+		#define DISKNUM1  1
+		#define TOTALNUM  0
+		#define TOTALNUM0  1
+
+	$ touch image/ubuntu
+	$ mkdir image/.disk
+	$ cd image/.disk
+	$ touch base_installable
+	$ echo "full_cd/single" > cd_type
+	$ echo "Offline Install" > info
+	$ echo "Offline install" > release_notes_url
+	$ cd ../..
+
+	$ sudo -s
+(cd image && find . -type f -print0 | xargs -0 md5sum | grep -v "\./md5sum.txt" > md5sum.txt)
+exit
+
+	$ cd image
+	$ sudo mkisofs -r -V "Offline Install" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../offlineinstalllin.iso .
+
+	SE SI USA XBOOT, ELIMINARE DA mkisofs L'OPZIONE -c isolinux/boot.cat
+
+	$ cd ..
+
+	NOME ISO: offlineinstalllin.iso
+
+4) Modificare la ISO gia' creata:
+
+	$ cd work
+	$ rm -Rf image
+	$ rm offlineinstalllin.iso
+	$ sudo mount --bind /dev chroot/dev
+	$ sudo chroot chroot
+        $ mount none -t proc /proc
+        $ mount none -t sysfs /sys
+        $ mount none -t devpts /dev/pts
+        $ export HOME=/root
+        $ export LC_ALL=C
+
+	<< A QUESTO PUNTO QUI BISOGNA INSTALLARE TRAMITE APT I SOFTWARE NECESSARI ALL'OFFLINE INSTALLER >>
+
+	$ rm -Rf /root/.ssh/
+	$ umount -lf /proc
+        $ umount -lf /sys
+        $ umount -lf /dev/pts
+        $ exit
+        $ sudo umount /path/to/chroot/dev
+
+        $ mkdir -p image/{casper,isolinux}
+        $ cp chroot/boot/vmlinuz-$KERNEL_VERSION-generic image/casper/vmlinuz
+        $ cp chroot/boot/initrd.img-$KERNEL_VERSION-generic image/casper/initrd.lz
+        $ cp /usr/lib/syslinux/isolinux.bin image/isolinux/
+
+        $ touch image/isolinux/isolinux.cfg
+        $ vim image/isolinux/isolinux.cfg
+
+                TIMEOUT 1
+                PROMPT 0
+                NOESCAPE 1
+                DEFAULT offline
+                LABEL offline
+                  menu label ^Start Offline Install
+                  kernel /casper/vmlinuz
+                  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+
+        SE SI USA XBOOT, MODIFICARE:
+
+        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+
+        CON:
+
+        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- iso-scan/filename=/images/<name>.iso
+
+        CON <name>.iso IN NOME FINALE DELLA ISO DUAL BOOT CON MKISOFS.iso OVVERO offlineinstalllin
+
+	$ sudo chroot chroot dpkg-query -W --showformat='${Package} ${Version}\n' | sudo tee image/casper/filesystem.manifest
+sudo cp -v image/casper/filesystem.manifest image/casper/filesystem.manifest-desktop
+REMOVE='ubiquity ubiquity-frontend-gtk ubiquity-frontend-kde casper lupin-casper live-initramfs user-setup discover1 xresprobe os-prober libdebian-installer4'
+for i in $REMOVE
+do
+        sudo sed -i "/${i}/d" image/casper/filesystem.manifest-desktop
+done
+
+        $ sudo mksquashfs chroot image/casper/filesystem.squashfs	
+        $ printf $(sudo du -sx --block-size=1 chroot | cut -f1) > image/casper/filesystem.size
+        $ nano image/README.diskdefines
+
+                #define DISKNAME  Offline Install
+                #define TYPE  binary
+                #define TYPEbinary  1
+                #define ARCH  i386
+                #define ARCHi386  1
+                #define DISKNUM  1
+                #define DISKNUM1  1
+                #define TOTALNUM  0
+                #define TOTALNUM0  1
+
+        $ touch image/ubuntu
+        $ mkdir image/.disk
+        $ cd image/.disk
+        $ touch base_installable
+        $ echo "full_cd/single" > cd_type
+        $ echo "Offline Install" > info
+        $ echo "Offline install" > release_notes_url
+        $ cd ../../
+
+        $ sudo -s
+(cd image && find . -type f -print0 | xargs -0 md5sum | grep -v "\./md5sum.txt" > md5sum.txt)
+exit
+
+        $ cd image
+        $ sudo mkisofs -r -V "Offline Install" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../offlineinstalllin.iso .
+
+        SE SI USA XBOOT, ELIMINARE DA mkisofs L'OPZIONE -c isolinux/boot.cat
+
+        $ cd ../
+
+	NOME ISO: offlineinstalllin.iso

