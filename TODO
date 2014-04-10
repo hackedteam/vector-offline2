@@ -1,6 +1,5 @@
 TODO Offline Install:
 =====================
-	- Sostituisci il nuovo offline-install.tar.gz nella ISO
 	- Il Macbook bianco vecchio ha problemi nel riavviarsi (acpi?)
 	- Ottenere i full names degli utenti dei sistemi operativi
         - Quando monto HFS+ con ufsd, non riesco a leggere i contenuti di molti file
