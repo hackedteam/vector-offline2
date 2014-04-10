@@ -104,6 +104,10 @@
 	$ rm fluxbox.tar.gz
 	$ mv .fluxbox fluxbox
 
+	COPIARE IL NOSTRO WALLPAPER DI DEFAULT ubuntu-light.png in:
+
+	$ cp ubuntu-light.png /usr/share/images/fluxbox/ubuntu-light.png
+
 	$ vim /etc/rc.local
 
 	PRIMA DI exit 0 INSERIRE:
@@ -128,11 +132,15 @@
 	...
 	GRUB_TIMEOUT=10
 
+	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+	
 	IN:
 
 	GRUB_HIDDEN_TIMEOUT=0
 	...
 	GRUB_TIMEOUT=0
+
+	GRUB_CMDLINE_LINUX_DEFAULT="quiet splash reboot=p"
 
 	SALVA ED ESCI DAL FILE
 
@@ -378,7 +386,7 @@
 		LABEL offline
 		  menu label ^Start Offline Install
 		  kernel /casper/vmlinuz
-		  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- 
+		  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p
 
 	SE SI USA XBOOT, MODIFICARE:
 
@@ -471,7 +479,7 @@ exit
                 LABEL offline
                   menu label ^Start Offline Install
                   kernel /casper/vmlinuz
-                  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+                  append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p
 
         SE SI USA XBOOT, MODIFICARE:
 
