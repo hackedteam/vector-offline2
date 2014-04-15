@@ -19,6 +19,7 @@ class OfflineInstall(object):
 	tabosx = None
 	useosx = None
 	exslin = False
+	crylin = False
 	tablin = None
 	uselin = None
 
@@ -116,7 +117,17 @@ class OfflineInstall(object):
 			for j in devs:
 				if j.find(i) != -1:
 					if len(j) > 3:
-						print("  Found: /dev/" + j)
+						try:
+							ret = subprocess.call("cryptsetup isLuks /dev/{}".format(j), shell=True)
+							if int(ret) == 0:
+								self.crylin = True
+								print("  Found: /dev/" + j + ' (Encrypted)')
+							else:
+								print("  Found: /dev/" + j) 
+						except:
+							print("  Found: /dev/" + j)
+							pass
+
 						parts.append(j)
 
 		if parts == []:
@@ -130,7 +141,7 @@ class OfflineInstall(object):
 	##
 	def check_filesystems(self):
 		parts = self.check_partitions()
-		fs = ['ufsd', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
 		tablefs = []
 	
 		if parts == None:
@@ -145,11 +156,12 @@ class OfflineInstall(object):
 
 		for i in parts:
 			for j in fs:
+				os = None
+
 				try:
 					ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(j, i), shell=True)
-					os = None
 
-					if j == 'ufsd':
+					if j == 'hfsplus':
 						os = 'os x'
 					else:
 						os = 'linux'
@@ -163,6 +175,9 @@ class OfflineInstall(object):
 					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
 				except:
 					pass
+
+				if os != None:
+					break
 		
 		if tablefs == []:
 			print("  Not found: Hd filesystems")
@@ -186,12 +201,15 @@ class OfflineInstall(object):
 			try:
 				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(i[2], i[1]), shell=True)
 
-				if i[0] == 'os x' and os.path.exists('/mnt/mach_kernel') == True:
-					mountpoint = '/'
+				if i[0] == 'os x':
+					if os.path.exists('/mnt/mach_kernel') == True:
+						mountpoint = '/'
 
-					print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + mountpoint)
+						print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + mountpoint)
+						self.exsosx = True
+						tablemount.append([i[0], i[1], i[2], mountpoint])
+
 					self.exsosx = True
-					tablemount.append([i[0], i[1], i[2], mountpoint])
 				elif i[0] == 'linux':
 					ret = int(subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i UUID | wc -l", shell=True)[:-1])
 					uuid_sup = None
@@ -204,9 +222,12 @@ class OfflineInstall(object):
 						uuid_sup = "NO UUID"
 						mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
 
-					print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
+					if len(mountpoint) != 0:
+						print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
+						self.exslin = True
+						tablemount.append([i[0], i[1], i[2], mountpoint])
+
 					self.exslin = True
-					tablemount.append([i[0], i[1], i[2], mountpoint])
 			except:
 				pass
 
@@ -265,14 +286,15 @@ class OfflineInstall(object):
 				tablelinux.update({'varfs': i[2]})
 				tablelinux.update({'varmount': i[3]})
 
-		if ('homedisk' in tablelinux) == False:
-			tablelinux.update({'homedisk': None})
-			tablelinux.update({'homefs': None})
-			tablelinux.update({'homemount': "/home"})
-		if ('vardisk' in tablelinux) == False:
-			tablelinux.update({'vardisk': None})
-			tablelinux.update({'varfs': None})
-			tablelinux.update({'varmount': "/var"})
+		if tablelinux != {}:
+			if ('homedisk' in tablelinux) == False:
+				tablelinux.update({'homedisk': None})
+				tablelinux.update({'homefs': None})
+				tablelinux.update({'homemount': "/home"})
+			if ('vardisk' in tablelinux) == False:
+				tablelinux.update({'vardisk': None})
+				tablelinux.update({'varfs': None})
+				tablelinux.update({'varmount': "/var"})
 
 		if tablelinux == {}:
 			print("    Not found: Hd Linux system")
@@ -393,7 +415,7 @@ class OfflineInstall(object):
 		self.tabosx.update({'osname': osname})
 		self.tabosx.update({'osarch': osarch})
 
-		if osversion.find("10.5" or "10.6" or "10.7" or "10.8" or "10.9") != -1:
+		if osversion.find("10.5") != -1 or osversion.find("10.6") != -1 or osversion.find("10.7") != -1 or osversion.find("10.8") != -1 or osversion.find("10.9") != -1:
 			ossupport = True
 
 		self.tabosx.update({'ossupport': ossupport})
@@ -627,10 +649,10 @@ class OfflineInstall(object):
 		self.builder.get_object("treeview1").set_sensitive(True)
 		self.builder.get_object("buttonbox3").set_sensitive(True)
 
-		if self.tabosx != None:
+		if self.tabosx != None or self.exsosx != False:
 			self.builder.get_object("comboboxtext1").prepend_text("Mac OS X")
 
-		if self.tablin != None:
+		if self.tablin != None or self.exslin != False:
 			self.builder.get_object("comboboxtext1").prepend_text("Linux")
 
 		self.builder.get_object("comboboxtext1").set_active(0)
@@ -655,9 +677,9 @@ class OfflineInstall(object):
 				self.builder.get_object("treeview1").set_sensitive(True)
 				self.builder.get_object("buttonbox3").set_sensitive(True)
 			else:
-				self.builder.get_object("image1").set_from_file(self.tabosx['imgoff'])	
-				self.builder.get_object("label3").set_label("Computer Name: Mac OS X")
-				self.builder.get_object("label4").set_label("OS Version: unknown")
+				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/macos-off.bmp')	
+				self.builder.get_object("label3").set_label("Computer Name: Unknown")
+				self.builder.get_object("label4").set_label("OS Version: Mac OS X")
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
@@ -685,9 +707,13 @@ class OfflineInstall(object):
 				self.builder.get_object("treeview1").set_sensitive(True)
 				self.builder.get_object("buttonbox3").set_sensitive(True)
 			else:
-				self.builder.get_object("image1").set_from_file(self.tablin['imgoff'])
-				self.builder.get_object("label3").set_label("Computer Name: Linux")
-				self.builder.get_object("label4").set_label("OS Version: unknown")
+				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/linux-off.bmp')
+				self.builder.get_object("label3").set_label("Computer Name: Unknown")
+
+				if self.crylin == True:
+					self.builder.get_object("label4").set_label("OS Version: Linux (Encrypted)")
+				else:
+					self.builder.get_object("label4").set_label("OS Version: Linux")
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
