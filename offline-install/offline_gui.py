@@ -218,6 +218,10 @@ class OfflineInstall(object):
 						uuid_sup = "UUID"
 						uuid = subprocess.check_output("blkid | grep -i '{}' | awk '{{print $2}}'".format(i[1]), shell=True)[6:-2].decode('utf-8')
 						mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
+
+						if len(mountpoint) == 0:
+							uuid_sup = "UUID MALFORMED"
+							mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
 					else:
 						uuid_sup = "NO UUID"
 						mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
