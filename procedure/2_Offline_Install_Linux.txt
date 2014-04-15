@@ -92,6 +92,7 @@
 	$ apt-get install lightdm-gtk-greeter
 	$ apt-get install gnome-icon-theme-symbolic
 	$ apt-get install fluxbox
+	$ apt-get install vim
 
 	$ echo "blacklist b43" | sudo tee -a /etc/modprobe.d/blacklist-b43.conf
 
@@ -178,7 +179,7 @@
 	
 	SALVA ED ESCI DAL FILE
 
-	$ nano /etc/rc0.d/S89casper
+	$ vim /etc/rc0.d/S89casper
 
 	PRIMA DELLE RIGHE:
 
@@ -193,7 +194,7 @@
 
 	SALVA ED ESCI DAL FILE
 
-	$ nano /etc/rc6.d/S89casper
+	$ vim /etc/rc6.d/S89casper
 
 	PRIMA DELLE RIGHE:
 
@@ -377,7 +378,6 @@
 	$ cp /usr/lib/syslinux/isolinux.bin image/isolinux/
 
 	$ touch image/isolinux/isolinux.cfg
-	$ sudo apt-get install vim
 	$ vim image/isolinux/isolinux.cfg
 
 		TIMEOUT 1
@@ -409,7 +409,7 @@ done
 
 	$ sudo mksquashfs chroot image/casper/filesystem.squashfs
 	$ printf $(sudo du -sx --block-size=1 chroot | cut -f1) > image/casper/filesystem.size
-	$ nano image/README.diskdefines
+	$ vim image/README.diskdefines
 
 		#define DISKNAME  Offline Install
 		#define TYPE  binary
@@ -502,7 +502,7 @@ done
 
         $ sudo mksquashfs chroot image/casper/filesystem.squashfs	
         $ printf $(sudo du -sx --block-size=1 chroot | cut -f1) > image/casper/filesystem.size
-        $ nano image/README.diskdefines
+        $ vim image/README.diskdefines
 
                 #define DISKNAME  Offline Install
                 #define TYPE  binary
