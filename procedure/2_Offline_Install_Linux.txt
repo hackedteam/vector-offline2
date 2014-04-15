@@ -91,6 +91,8 @@
 	$ apt-get install libgtk-3-dev
 	$ apt-get install lightdm-gtk-greeter
 	$ apt-get install gnome-icon-theme-symbolic
+	$ apt-get install gnome-icon-theme-full
+	$ apt-get install gnome-humility-icon-theme
 	$ apt-get install fluxbox
 	$ apt-get install vim
 
