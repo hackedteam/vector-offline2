@@ -97,7 +97,7 @@ class OfflineInstall(object):
 
 		if hds == []:
 			print("  Not found: Hd devices")
-			return None
+			return [devs, None]
 
 		return [devs, hds]
 
