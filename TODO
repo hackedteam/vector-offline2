@@ -1,4 +1,5 @@
 TODO Offline Install:
 =====================
 	- Ottenere i full names degli utenti dei sistemi operativi
-        - Scrivere l'applicazione di infezione mac e linux per OS Linux
+	- Su qualche linux, fstab e blkid non danno li stessi UUID
+	- Scrivere le funzioni di RCS nell'applicativo
