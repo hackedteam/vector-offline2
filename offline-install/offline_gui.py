@@ -14,6 +14,8 @@ class OfflineInstall(object):
 	window = None
 	scroll = None
 	treeview = None
+	selection = None
+	icon = None
 	status = False
 	exsosx = False
 	tabosx = None
@@ -36,14 +38,25 @@ class OfflineInstall(object):
 		self.scroll = self.builder.get_object("scrolledwindow1")
 		self.liststore = self.builder.get_object("liststore1")
 		self.treeview = self.builder.get_object("treeview1")
+		self.selection = self.builder.get_object("treeview-selection1")
 
-		renderer_text0 = Gtk.CellRendererText()
-		column_text0 = Gtk.TreeViewColumn("Name", renderer_text0, text = 0)
-		self.treeview.append_column(column_text0)
+		renderer_pix0 = Gtk.CellRendererPixbuf()
+		column_pix0 = Gtk.TreeViewColumn("", renderer_pix0, pixbuf = 0)
+		self.treeview.append_column(column_pix0)
 
 		renderer_text1 = Gtk.CellRendererText()
-		column_text1 = Gtk.TreeViewColumn("Full Name", renderer_text1, text = 1)
+		column_text1 = Gtk.TreeViewColumn("Name", renderer_text1, text = 1)
 		self.treeview.append_column(column_text1)
+
+		renderer_text2 = Gtk.CellRendererText()
+		column_text2 = Gtk.TreeViewColumn("Full Name", renderer_text2, text = 2)
+		self.treeview.append_column(column_text2)
+
+		self.icon = Gtk.IconTheme.get_default()
+
+		#
+		# TODO: Verificare se dentro il lettore CD/DVD ci sia la directory rcspa
+		##
 
 		self.start()
 
@@ -339,6 +352,23 @@ class OfflineInstall(object):
 		return True
 
 	#
+	# Check the infect status of OS X user
+	##
+	def check_osx_infected_user(self, user, home):
+		print("      Check if " + user + " OS X user with " + home + " home is infected...")
+
+		# 
+		# TODO:
+		# Verifica se l'utente non e' infettato, l'infezione e' corrotta oppure e' gia' infettato
+		#
+		# None -> Not infected
+		# False -> Corrupted infected
+		# True -> Infected
+		##
+
+		return True
+
+	#
 	# Search OS X system users
 	##
 	def check_osx_users(self):
@@ -352,7 +382,8 @@ class OfflineInstall(object):
 			if i[0] == '.' or i == "shared" or i == "Shared":
 				continue
 
-			self.useosx.append({'username': i, 'home': '/Users/' + i})
+			status = self.check_osx_infected_user(i, '/Users/' + i)
+			self.useosx.append({'username': i, 'home': '/Users/' + i, 'fullname': "", 'status': status})
 
 		if self.useosx == []:
 			self.useosx = None
@@ -447,20 +478,43 @@ class OfflineInstall(object):
 		return True
 
 	#
+	# Check the infect status of Linux user
+	##
+	def check_linux_infected_user(self, user, home):
+		print("      Check if " + user + " Linux user with " + home + " home is infected...")
+
+		#
+		# TODO:
+		# Verifica se l'utente non e' infettato, l'infezione e' corrotta oppure e' gia' infettato
+		#
+		# None -> Not infected
+		# False -> Corrupted infected
+		# True -> Infected
+		##
+
+		return True
+
+	#
 	# Search Linux OS system users
 	##
 	def check_linux_users(self):
 		self.uselin = []
+		user = []
 
 		print("    Check Linux system users...")
 
 		users = os.listdir('/mnt/home/')
 
 		for i in users:
-			if i[0] == '.':
-				continue
+			user.append(i)
 
-			self.uselin.append({'username': i, 'home': '/home/' + i})
+		for line in open("/mnt/etc/passwd").readlines():
+			line = line.replace("\n", "").split(":")
+
+			for u in user:
+				if u == line[0]:
+					status = self.check_linux_infected_user(line[0], line[5])
+					self.uselin.append({'username': line[0], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': status})
 
 		if self.uselin == []:
 			self.uselin = None
@@ -676,7 +730,14 @@ class OfflineInstall(object):
 				self.builder.get_object("label4").set_label(output)
 
 				for i in self.useosx:
-					self.builder.get_object("liststore1").append([i['username'], ""])
+					status = None
+
+					if i['status'] == True:
+						status = self.icon.load_icon('gtk-apply', 20, 0)
+					elif i['status'] == False:
+						status = self.icon.load_icon('gtk-close', 20, 0)
+
+					self.builder.get_object("liststore1").append([status, i['username'], i['fullname']])
 
 				self.builder.get_object("treeview1").set_sensitive(True)
 				self.builder.get_object("buttonbox3").set_sensitive(True)
@@ -706,7 +767,14 @@ class OfflineInstall(object):
 				self.builder.get_object("label4").set_label(output)
 
 				for i in self.uselin:
-					self.builder.get_object("liststore1").append([i['username'], ""])
+					status = None
+
+					if i['status'] == True:
+						status = self.icon.load_icon('gtk-apply', 20, 0)
+					elif i['status'] == False:
+						 status = self.icon.load_icon('gtk-close', 20, 0)
+
+					self.builder.get_object("liststore1").append([status, i['username'], i['fullname']])
 
 				self.builder.get_object("treeview1").set_sensitive(True)
 				self.builder.get_object("buttonbox3").set_sensitive(True)
@@ -736,15 +804,33 @@ class OfflineInstall(object):
 	def rescan(self, *args):
 		self.start()
 
+	#
+	# TODO
+	##
+	def changeselect(self, *args):
+		print("SELECT")
+
+	#
+	# TODO
+	##
 	def install(self, *args):
 		print("INSTALL")
 
+	#
+	# TODO
+	##
 	def uninstall(self, *args):
 		print("UNINSTALL")
 
+	#
+	# TODO
+	##
 	def export_log(self, *args):
 		print("EXPORT LOG")
 
+	#
+	# TODO
+	##
 	def dump_files(self, *args):
 		print("DUMP FILES")
 
@@ -753,6 +839,11 @@ class OfflineInstall(object):
 	##
 	def halt(self, *args):
 		self.stop()
+
+	#
+	# TODO:
+	# Qui dovra' spegnere la macchina
+	##
 		sys.exit(0)
 
 	#
