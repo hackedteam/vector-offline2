@@ -81,6 +81,7 @@
 	$ apt-get install firmware-b43-installer
 	$ apt-get install linux-firmware-nonfree
 	$ apt-get install firmware-b43legacy-installer
+	$ apt-get install cryptsetup
 	$ apt-get install xinit
 	$ apt-get install xauth
 	$ apt-get install v86d
