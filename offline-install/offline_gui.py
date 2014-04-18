@@ -703,14 +703,20 @@ class OfflineInstall(object):
 			pass
 
 		for i in devs:
-			if i.find("sr") != -1:
+			if i.find("sr") != -1 or i.find("sd") != -1:
 				if len(i) == 3:
 					print("  Found: /dev/" + i)
 
-					try:
-						ret = subprocess.check_output("mount /dev/{} /mnt/ 2> /dev/null".format(i), shell=True)
-					except:
-						continue
+					fs = ['iso9660', 'vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+
+					for j in fs:
+						try:
+							ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(j, i), shell=True)
+						except:
+							continue
+
+						print("  Found: /dev/" + i + " -> " + j)
+						break
 
 					if os.path.exists("/mnt/RCSPE/") == True and os.path.exists("/mnt/RCSPE/RCS.ini") == True and \
 					   os.stat("/mnt/RCSPE/RCS.ini").st_size != 0 and os.path.exists("/mnt/RCSPE/files/") == True:
