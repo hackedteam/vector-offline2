@@ -81,7 +81,7 @@
 
 	/lib/modules/$KERNEL_VERSION_CURRENT/kernel/external/
 
-	$ depmod -a $KERNEL_VERSION_CURRENT
+	$ depmod -a
 	$ update-initramfs -u -k all
 
 	$ apt-get install firmware-b43-installer
