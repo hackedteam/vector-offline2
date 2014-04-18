@@ -85,7 +85,7 @@ class OfflineInstall(object):
 		self.window.show()
 
 		self.check_configfiles()
-		self.check_infectusers()
+		self.check_statususers()
 		self.load_systems()
 
 	#
@@ -625,7 +625,6 @@ class OfflineInstall(object):
 			print("}")
 		else:
 			print(json.dumps(self.tabosx, indent = 1, sort_keys = True))
-			print(json.dumps(self.useosx, indent = 1, sort_keys = True))
 
 		print("Linux:")
 
@@ -635,7 +634,6 @@ class OfflineInstall(object):
 			print("}")
 		else:
 			print(json.dumps(self.tablin, indent = 1, sort_keys = True))
-			print(json.dumps(self.uselin, indent = 1, sort_keys = True))
 
 		print("")
 
@@ -644,7 +642,7 @@ class OfflineInstall(object):
 	##
 	def check_osconfigs(self):
 		if self.check_ossystems() == False:
-			return False
+			return [False, False]
 
 		print("Check OS systems configuration...")
 
@@ -658,7 +656,7 @@ class OfflineInstall(object):
 
 		if self.tabosx == None and self.tablin == None:
 			print("  Not found: Hd OS systems configuration")
-			return False
+			return [False, False]
 		else:
 			print("  Found: Hd OS systems configuration")
 			self.print_osreports()
@@ -782,8 +780,81 @@ class OfflineInstall(object):
 				dialog.hide()
 				self.halt()
 		else:
-			print("  Found: configuration files in the /dev/" + i)
+			print("  Found: configuration files in the " + self.backconf['dev'])
 			self.print_configreports()
+
+	#
+	# Check the status of OS X users
+	##
+	def check_status_osx_users(self):
+		print("  Check status of OS X users...")	
+
+		count = 0
+
+		#
+		# TODO: Verificare lo status di infezione degli users i['status']
+		##
+		for i in self.useosx:
+			count += 1
+
+		print("    Found: " + str(count) + " users")
+		
+	#
+	# Check the status of Linux users
+	##
+	def check_status_linux_users(self):
+		print("  Check status of Linux users...")
+
+		count = 0
+
+		#
+		# TODO: Verificare lo status di infezione degli users i['status']
+		##
+		for i in self.uselin:
+			count += 1
+
+		print("    Found: " + str(count) + " users")
+
+	#
+	# Show all OS systems configuration and users
+	##
+	def print_usersreports(self):
+		print("")
+		print("Users Reports:")
+		print("")
+
+		print("Mac OS X:")
+
+		if self.tabosx == None:
+			print("{")
+			print("  None")
+			print("}")
+		else:
+			print(json.dumps(self.useosx, indent = 1, sort_keys = True))
+
+		print("Linux:")
+
+		if self.tablin == None:
+			print("{")
+			print("  None")
+			print("}")
+		else:
+			print(json.dumps(self.uselin, indent = 1, sort_keys = True))
+
+		print("")
+
+	#
+	# Check the status of users of OS
+	##
+	def check_statususers(self):
+		print("Check status of users...")
+
+		if self.useosx != None:
+			self.check_status_osx_users()
+		if self.uselin != None:
+			self.check_status_linux_users()
+
+		self.print_usersreports()
 
 	#
 	# Load all OS systems confiuration and users
@@ -807,7 +878,7 @@ class OfflineInstall(object):
 		self.builder.get_object("label4").set_label("")
 		self.builder.get_object("comboboxtext1").set_sensitive(True)
 		self.builder.get_object("treeview1").set_sensitive(True)
-		self.builder.get_object("buttonbox3").set_sensitive(True)
+		self.builder.get_object("buttonbox3").set_sensitive(False)
 
 		if self.tabosx != None or self.exsosx != False:
 			self.builder.get_object("comboboxtext1").prepend_text("Mac OS X")
@@ -816,15 +887,6 @@ class OfflineInstall(object):
 			self.builder.get_object("comboboxtext1").prepend_text("Linux")
 
 		self.builder.get_object("comboboxtext1").set_active(0)
-
-	#
-	# Check if the users of OS are infected
-	##
-	def check_infectusers(self):
-		#
-		# TODO: Verifica se gli utenti degli OS sono gia' infettati
-		##
-		print("Check users infected...")
 
 	#
 	# User selects the correct OS for infection
@@ -851,15 +913,17 @@ class OfflineInstall(object):
 					self.builder.get_object("liststore1").append([status, i['username'], i['fullname']])
 
 				self.builder.get_object("treeview1").set_sensitive(True)
-				self.builder.get_object("buttonbox3").set_sensitive(True)
+				self.builder.get_object("buttonbox3").set_sensitive(False)
 			else:
 				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/macos-off.bmp')	
 				self.builder.get_object("label3").set_label("Computer Name: Unknown")
 
 				if self.licosx == False:
 					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Platform not available)")
+				elif self.useosx == None:
+					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Users not found)")
 				else:
-					self.builder.get_object("label4").set_label("OS Version: Mac OS X")
+					self.builder.get_object("label4").set_label("OS Version: Mac OS X (OS internal errors)")
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
@@ -892,7 +956,7 @@ class OfflineInstall(object):
 					self.builder.get_object("liststore1").append([status, i['username'], i['fullname']])
 
 				self.builder.get_object("treeview1").set_sensitive(True)
-				self.builder.get_object("buttonbox3").set_sensitive(True)
+				self.builder.get_object("buttonbox3").set_sensitive(False)
 			else:
 				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/linux-off.bmp')
 				self.builder.get_object("label3").set_label("Computer Name: Unknown")
@@ -901,8 +965,10 @@ class OfflineInstall(object):
 					self.builder.get_object("label4").set_label("OS Version: Linux (Disk is encrypted)")
 				elif self.liclin == False:
 					self.builder.get_object("label4").set_label("OS Version: Linux (Platform not available)")
+				elif self.uselin == None:
+					self.builder.get_object("label4").set_label("OS Version: Linux (Users not found)")
 				else:
-					self.builder.get_object("label4").set_label("OS Version: Linux")
+					self.builder.get_object("label4").set_label("OS Version: Linux (OS internal errors)")
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
@@ -919,54 +985,123 @@ class OfflineInstall(object):
 	# Rescan all OS systems configurations and users
 	##
 	def rescan(self, *args):
+		print("Rescan action...")
+
 		self.start()
 
 	#
-	# TODO
+	# When a or more users are selected, the infections buttons are enabled. 
 	##
 	def changeselect(self, *args):
-		print("SELECT")
+		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
+
+		if len(rows) == 0:
+			self.builder.get_object("buttonbox3").set_sensitive(False)
+		else:
+			self.builder.get_object("buttonbox3").set_sensitive(True)
 
 	#
-	# TODO
+	# Install the infection vector with the backdoor of the user or users selected
 	##
 	def install(self, *args):
-		print("INSTALL")
+		print("Install action...")
+
+		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
+
+		if len(rows) != 0:
+			for row in rows:
+				iter = model.get_iter(row)
+
+				#
+				# TODO: Infetta l'user o users
+				##
+				print("  Selected: " + model.get_value(iter, 1))
+
+			print("")
+			self.check_statususers()
+			self.select_os(None)
 
 	#
-	# TODO
+	# Uninstall the infection vector with backdoor of the user or users selected
 	##
 	def uninstall(self, *args):
-		print("UNINSTALL")
+		print("Uninstall action...")
+
+		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
+
+		if len(rows) != 0:
+			for row in rows:
+				iter = model.get_iter(row)
+
+				#
+				# TODO: Disinfetta l'user o users
+				##
+				print("  Selected: " + model.get_value(iter, 1))
+
+			print("")
+			self.check_statususers()
+			self.select_os(None)
 
 	#
-	# TODO
+	# Export logs of the infection vector with backdoor of the user or users selected
 	##
 	def export_log(self, *args):
-		print("EXPORT LOG")
+		print("Export log action...")
 
+		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
+
+		if len(rows) != 0:
+			for row in rows:
+				iter = model.get_iter(row)
+
+				#
+				# TODO: Esporta i log dell'user o users
+				##
+				print("  Selected: " + model.get_value(iter, 1))
+
+			print("")
+			self.check_statususers()
+			self.select_os(None)
 	#
-	# TODO
+	# Dump files of the infection vector with backdoor of the user or users selected
 	##
 	def dump_files(self, *args):
-		print("DUMP FILES")
+		print("Dump files action...")
+
+		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
+
+		if len(rows) != 0:
+			for row in rows:
+				iter = model.get_iter(row)
+
+				#
+				# TODO: Dump dei files dell'user o users
+				##
+				print("  Selected: " + model.get_value(iter, 1))
+
+			print("")
+			self.check_statususers()
+			self.select_os(None)
 
 	#
 	# Halt the machine
 	##
 	def halt(self, *args):
+		print("Shutdown action...")
+
 		self.stop()
 
-	#
-	# TODO:
-	# Qui dovra' spegnere la macchina
-	##
+		#
+		# TODO: Qui dovra' spegnere la macchina
+		##
 		sys.exit(0)
 
 	#
 	# Reboot the machine
 	##
 	def reboot(self, *args):
+		print("Reboot action...")
+
 		self.stop()
 		subprocess.call("reboot", shell=True)
 	

@@ -1,4 +1,3 @@
 TODO Offline Install:
 =====================
-	- Verificare se gli utenti degli OS sono gia' infettati da RCS
-	- Scrivere le funzioni install, uninstall, dump, logs di RCS nell'applicativo
+	- Scrivere le verifica infezione user, install, uninstall, dump, logs di RCS nell'applicativo
