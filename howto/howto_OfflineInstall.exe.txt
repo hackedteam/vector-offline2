@@ -1,0 +1,14 @@
+Come reperire l'ultimo OfflineInstall.exe per l'Offline Installer CD per Windows:
+=================================================================================
+
+1) Copiare rcs-dev/share/RELEASE/SVILUPPO/cores.../offline.zip
+
+2) Unzippare offline.zip
+
+3) Dentro offline/winpe/sources/ c'e' il file boot.wim
+
+4) Copiare boot.wim su piattaforma Windows
+
+5) Su Windows, installare il programma image X per poter aprire il file immagine boot.wim
+
+6) Su Windows, aprire boot.wim, dentro si trova il file OfflineInstall.exe 
