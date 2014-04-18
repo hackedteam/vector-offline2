@@ -3,6 +3,12 @@
 	$ apt-get update
 	$ apt-get upgrade
 
+	SE ALCUNI PACCHETTI NON VUOLE AGGIORNARLI, INSTALLARLI A MANO CON:
+
+	$ apt-get install pacchetto1 pacchetto2 ... pacchettoN
+
+	SE AGGIORNA IL KERNEL, RIAVVIARE E POI SEGUIRE LA PROCEDURA DA QUI
+
 2) Installare i driver Paragon UFSD (fino a kernel 3.11):
 
 	$ mkdir ufsd
