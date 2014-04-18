@@ -84,6 +84,8 @@
 	$ depmod -a
 	$ update-initramfs -u -k all
 
+	<< A QUESTO PUNTO QUI BISOGNA INSTALLARE TRAMITE APT I SOFTWARE NECESSARI ALL'OFFLINE INSTALLER >>
+
 	$ apt-get install firmware-b43-installer
 	$ apt-get install linux-firmware-nonfree
 	$ apt-get install firmware-b43legacy-installer
@@ -131,8 +133,6 @@
 	$ tar -xvzf offline-install.tar.gz
 	$ rm offline-install.tar.gz
 	$ chmod +x /opt/offline-install/offline_gui.py
-
-	<< A QUESTO PUNTO QUI BISOGNA INSTALLARE TRAMITE APT I SOFTWARE NECESSARI ALL'OFFLINE INSTALLER >>
 
 	$ vi /etc/default/grub
 
