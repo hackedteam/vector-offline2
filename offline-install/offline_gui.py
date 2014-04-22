@@ -795,16 +795,76 @@ class OfflineInstall(object):
 	def check_status_osx_users(self):
 		print("  Check status of OS X users...")	
 
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfs'], self.tabosx['rootdisk']), shell=True)
+		except:
+			return
+
 		count = 0
 
-		#
-		# TODO: Verificare lo status di infezione degli users i['status']
-		##
 		for i in self.useosx:
+			is_dir = False
+			is_files = False
+			is_temp_dir = False
+			is_temp_files = False
+
+			print("    Check " + i['username'] + " user...")
+
+			backdoor_path = "/mnt" + i['home'] + "/Library/Preferences/" + self.backconf['hdir']
+			backdoor_core_path = backdoor_path + "/" + self.backconf['hcore']
+
+			backdoor_old_path = "/mnt" + i['home'] + "/Library/Preferences/" + self.backconf['hdir'] + ".app"
+			backdoor_core_old_path = backdoor_old_path + "/" + self.backconf['hcore']
+
+			backdoor_tmp_path =  "/mnt" + i['home'] + "/Library/Preferences/" + self.backconf['hdir'] + "_"
+			backdoor_core_tmp_path = backdoor_tmp_path + "/" + self.backconf['hcore']
+
+			print("      -> " + backdoor_path)
+			print("      -> " + backdoor_core_path)
+			print("      -> " + backdoor_old_path)
+			print("      -> " + backdoor_core_old_path)
+			print("      -> " + backdoor_tmp_path)
+			print("      -> " + backdoor_core_tmp_path)
+
+			if os.path.exists(backdoor_path) == True:
+				is_dir = True
+
+				if os.path.exists(backdoor_core_path) == True:
+					is_files = True
+			elif os.path.exists(backdoor_old_path) == True:
+				is_dir = True
+
+				if os.path_exists(backdoor_core_old_path) == True:
+					is_files = True
+					
+			if os.path.exists(backdoor_tmp_path) == True:
+				is_temp_dir = True
+
+				if os.path_exists(backdoor_core_tmp_path) == True:
+					is_temp_files = True
+
+			if is_dir == False and is_temp_dir == False:
+				print("        " + i['username'] + " status is: not infected") 
+				i['status'] = None 
+			elif is_temp_files == True and is_dir == False:
+				print("        " + i['username'] + " status is: infected")
+				i['status'] = True
+			elif is_files == True and is_temp_dir == False:
+				print("        " + i['username'] + " status is: infected")
+				i['status'] = True 
+			else:
+				print("        " + i['username'] + " status is: corrupted infection")
+				i['status'] = False
+
 			count += 1
 
 		print("    Found: " + str(count) + " users")
-		
+
+		try:
+			ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+		except:
+			return 
+
 	#
 	# Check the status of Linux users
 	##
