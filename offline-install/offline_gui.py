@@ -747,7 +747,7 @@ class OfflineInstall(object):
 							line = line.replace("\n", "").split("=")
 							self.backconf.update({line[0].lower(): line[1]})
 
-						keys = ['version', 'hdir', 'hreg', 'hcore', 'hdrv', 'driver64', 'hsys', 'hkey', 'huid', 'func']
+						keys = ['version', 'hdir', 'hreg', 'hcore', 'hconf', 'hdrv', 'dll64', 'driver64', 'hsys', 'hkey', 'huid', 'func']
 
 						for i in keys:
 							if (i in self.backconf) == False:
