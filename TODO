@@ -1,5 +1,4 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
-	- Scrivere la versione di verifica infezione RCS per Linux
 	- Scrivere le funzione install, uninstall, dump, logs di RCS nell'applicativo
