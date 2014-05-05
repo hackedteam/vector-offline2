@@ -245,20 +245,20 @@ class OfflineInstall(object):
 
 					self.exsosx = True
 				elif i[0] == 'linux':
-					ret = int(subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i UUID | wc -l", shell=True)[:-1])
+					ret = int(subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i UUID | wc -l", shell=True)[:-1])
 					uuid_sup = None
 
 					if ret != 0:
 						uuid_sup = "UUID"
 						uuid = subprocess.check_output("blkid | grep -i '{}' | awk '{{print $2}}'".format(i[1]), shell=True)[6:-2].decode('utf-8')
-						mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
+						mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
 
 						if len(mountpoint) == 0:
 							uuid_sup = "UUID MALFORMED"
-							mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
+							mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
 					else:
 						uuid_sup = "NO UUID"
-						mountpoint = subprocess.check_output("cat /mnt/etc/fstab | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
+						mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
 
 					if len(mountpoint) != 0:
 						print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
@@ -499,7 +499,7 @@ class OfflineInstall(object):
 
 			for u in user:
 				if u == line[0]:
-					self.uselin.append({'username': line[0], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
+					self.uselin.append({'username': line[0], 'uid': line[2], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
 
 		if self.uselin == []:
 			self.uselin = None
@@ -871,15 +871,115 @@ class OfflineInstall(object):
 	def check_status_linux_users(self):
 		print("  Check status of Linux users...")
 
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt 2> /dev/null".format(self.tablin['rootfs'], self.tablin['rootdisk']), shell=True)
+		except:
+			return
+
+		if self.tablin['homefs'] != None:
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/home 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+			except:
+				try:
+					ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+				except:
+					pass
+				return
+
+		if self.tablin['varfs'] != None:
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/var 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+			except:
+				if self.tablin['homefs'] != None:
+					try:
+						ret = subprocess.check_output("umount /mnt/home 2> /dev/null", shell=True)
+					except:
+						pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+				except:
+					pass
+				return
+
 		count = 0
 
-		#
-		# TODO: Verificare lo status di infezione degli users i['status']
-		##
 		for i in self.uselin:
+			is_dir = False
+			is_file1 = False
+			is_file2 = False
+			is_file3 = False
+
+			print("    Check " + i['username'] + " user...")
+
+			backdoor_path1 = "/mnt/var/crash/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			backdoor_core_path1 = backdoor_path1 + "/whoopsie-report"
+			backdoor_conf_path1 = backdoor_path1 + "/.cache"
+
+			backdoor_path2 = "/mnt/var/tmp/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			backdoor_core_path2 = backdoor_path2 + "/whoopsie-report"
+			backdoor_conf_path2 = backdoor_path2 + "/.cache"
+			
+			backdoor_start_path = i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+
+			print("      -> " + backdoor_path1)
+			print("      -> " + backdoor_core_path1)
+			print("      -> " + backdoor_conf_path1)
+			print("      -> " + backdoor_path2)
+			print("      -> " + backdoor_core_path2)
+			print("      -> " + backdoor_conf_path2)
+			print("      -> " + backdoor_start_path)
+
+			if os.path.exists(backdoor_path1) == True:
+				is_dir = True
+
+				if os.path.exists(backdoor_core_path1) == True:
+					is_file1 = True
+
+				if os.path.exists(backdoor_conf_path1) == True:
+					is_file2 = True
+			elif os.path.exists(backdoor_path2) == True:
+				is_dir = True
+
+				if os.path.exists(backdoor_core_path2) == True:
+					is_file1 = True
+
+				if os.path.exists(backdoor_conf_path2) == True:
+					is_file2 = True
+
+			if os.path.exists(backdoor_start_path) == True:
+				is_file3 = True
+
+			if is_dir == False and is_file3 == False:
+				print("        " + i['username'] + " status is: not infected")
+				i['status'] = None
+			elif is_dir == True and is_file1 == True and is_file2 == True and is_file3 == True:
+				print("        " + i['username'] + " status is: infected")
+				i['status'] = True
+			else:
+				print("        " + i['username'] + " status is: corrupted infection")
+				i['status'] = False
+
 			count += 1
 
 		print("    Found: " + str(count) + " users")
+
+		if self.tablin['varfs'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt/var 2> /dev/null", shell=True)
+			except:
+				pass
+
+		if self.tablin['homefs'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt/home 2> dev/null", shell=True)
+			except:
+				pass
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			return
 
 	#
 	# Show all OS systems configuration and users
