@@ -10,7 +10,7 @@ In RCS.ini le backdoor linux utilizzano:
 
 1) Verificare se esiste /var/crash/
 
-2) Se esiste usare /var/crash altrimenti usare /var/tmp/
+2) Se esiste usare /var/crash/ altrimenti usare /var/tmp/
 
 3) Definisco $PATH come /var/crash/ o /var/tmp/
 
@@ -24,17 +24,17 @@ In RCS.ini le backdoor linux utilizzano:
 
 7) Identificare se il sistema dell'utente da infettare e' a 32 bit o 64 bit.
 
-8) Se e' 32 bit copiare il core giusto con il nome .whoopsie-report:
+8) Se e' 32 bit copiare il core giusto con il nome whoopsie-report:
 
-	$HCORE -> $PATH/.reports-$UID-$HDIR/.whoopsie-report
+	$HCORE -> $PATH/.reports-$UID-$HDIR/whoopsie-report
 
-9) Se e' 64 bit copiare il core giusto con il nome .whoopsie-report:
+9) Se e' 64 bit copiare il core giusto con il nome whoopsie-report:
 
-	$DLL64 -> $PATH/.reports-$UID-$HDIR/.whoopsie-report
+	$DLL64 -> $PATH/.reports-$UID-$HDIR/whoopsie-report
 
 10) Impostare il permesso di esecuzione al file creato:
 
-	chmod +x $PATH/.reports-$UID-$HDIR/.whoopsie-report
+	chmod +x $PATH/.reports-$UID-$HDIR/whoopsie-report
 
 11) Copiare la configurazione della backdoor:
 
