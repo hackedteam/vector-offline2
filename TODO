@@ -1,5 +1,6 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
+	- Fixare, l'install su mac, parte all'avvio ma chiede la passwd root
 	- Scrivere le funzioni install e uninstall per linux
 	- Scrivere le funzione dump, logs di RCS nell'applicativo
