@@ -1,4 +1,5 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
-	- Scrivere le funzione install, uninstall, dump, logs di RCS nell'applicativo
+	- Scrivere le funzioni install e uninstall per linux
+	- Scrivere le funzione dump, logs di RCS nell'applicativo

