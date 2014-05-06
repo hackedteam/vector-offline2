@@ -1255,7 +1255,7 @@ class OfflineInstall(object):
 
 		dest_path = "/mnt/private/etc/authorization"
 		source_path = "/mnt/private/etc/authorization.bu"
-		shutile.copyfile(source_path, dest_path)
+		shutil.copyfile(source_path, dest_path)
 		os.remove(source_path)
 
 		source_path = "/mnt/private/etc/authorization.mod"
@@ -1296,7 +1296,7 @@ class OfflineInstall(object):
 		for hfind in files:
 			tmp_path = files_path + "/" + hfind
 			tmp_path2 = temp_backdoor_path + "/" + hfind
-			shutile.copyfile(tmp_path, tmp_path2)
+			shutil.copyfile(tmp_path, tmp_path2)
 
 		try:
 			ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
