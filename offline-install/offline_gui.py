@@ -875,7 +875,7 @@ class OfflineInstall(object):
 				elif os.path.exists(backdoor_plist2) == True:
 					is_file2 = True
 				elif os.path.exists(backdoor_plist3) == True:
-					is_file3 = True
+					is_file2 = True
 
 			if os.path.exists(backdoor_tmp_path) == True:
 				is_temp_dir = True
