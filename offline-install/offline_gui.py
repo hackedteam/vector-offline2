@@ -824,9 +824,11 @@ class OfflineInstall(object):
 
 		for i in self.useosx:
 			is_dir = False
-			is_files = False
+			is_file1 = False
+			is_file2 = False
 			is_temp_dir = False
-			is_temp_files = False
+			is_temp_file1 = False
+			is_temp_file2 = False
 
 			print("    Check " + i['username'] + " user...")
 
@@ -836,40 +838,61 @@ class OfflineInstall(object):
 			backdoor_old_path = "/mnt" + i['home'] + "/Library/Preferences/" + self.backconf['hdir'] + ".app"
 			backdoor_core_old_path = backdoor_old_path + "/" + self.backconf['hcore']
 
+			backdoor_plist1 = "/mnt" + i['home'] + "/Library/LaunchAgents/com.apple.loginStoreagent.plist"
+			backdoor_plist2 = "/mnt" + i['home'] + "/Library/LaunchAgents/com.apple.mdworker.plist"
+			backdoor_plist3 = "/mnt" + i['home'] + "/Library/LaunchAgents/com.apple.UIServerLogin.plist"
+			
 			backdoor_tmp_path =  "/mnt" + i['home'] + "/Library/Preferences/" + self.backconf['hdir'] + "_"
 			backdoor_core_tmp_path = backdoor_tmp_path + "/" + self.backconf['hcore']
+
+			backdoor_tmp_plist = "/mnt/System/Library/LaunchDaemons/com.apple.mdworkers." + i['username'] + ".plist"
 
 			print("      -> " + backdoor_path)
 			print("      -> " + backdoor_core_path)
 			print("      -> " + backdoor_old_path)
 			print("      -> " + backdoor_core_old_path)
+			print("      -> " + backdoor_plist1)
+			print("      -> " + backdoor_plist2)
+			print("      -> " + backdoor_plist3)
 			print("      -> " + backdoor_tmp_path)
 			print("      -> " + backdoor_core_tmp_path)
+			print("      -> " + backdoor_tmp_plist)
 
 			if os.path.exists(backdoor_path) == True:
 				is_dir = True
 
 				if os.path.exists(backdoor_core_path) == True:
-					is_files = True
+					is_file1 = True
 			elif os.path.exists(backdoor_old_path) == True:
 				is_dir = True
 
 				if os.path.exists(backdoor_core_old_path) == True:
-					is_files = True
-					
+					is_file1 = True
+				
+			if is_file1 == True:
+				if os.path.exists(backdoor_plist1) == True:
+					is_file2 = True
+				elif os.path.exists(backdoor_plist2) == True:
+					is_file2 = True
+				elif os.path.exists(backdoor_plist3) == True:
+					is_file3 = True
+
 			if os.path.exists(backdoor_tmp_path) == True:
 				is_temp_dir = True
 
 				if os.path.exists(backdoor_core_tmp_path) == True:
-					is_temp_files = True
+					is_temp_file1 = True
+
+				if os.path.exists(backdoor_tmp_plist) == True:
+					is_temp_file2 = True
 
 			if is_dir == False and is_temp_dir == False:
 				print("        " + i['username'] + " status is: not infected") 
 				i['status'] = None 
-			elif is_temp_files == True and is_dir == False:
+			elif is_temp_file1 == True and is_temp_file2 == True and is_dir == False:
 				print("        " + i['username'] + " status is: infected")
 				i['status'] = True
-			elif is_files == True and is_temp_dir == False:
+			elif is_file1 == True and is_file2 == True and is_temp_dir == False:
 				print("        " + i['username'] + " status is: infected")
 				i['status'] = True 
 			else:
@@ -1498,6 +1521,17 @@ class OfflineInstall(object):
 			print("    Remove [ERROR] -> " + backdoor_path)
 			pass
 
+		#
+		# Cancella il plist della backdoor
+		##
+		backdoor_path = "/mnt" + home + "/Library/LaunchAgents/com.apple.loginStoreagent.plist"
+		try:
+			os.remove(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
+	
 		#
 		# Cancella il plist della backdoor
 		##
