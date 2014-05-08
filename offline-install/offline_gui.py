@@ -1328,6 +1328,9 @@ class OfflineInstall(object):
 		files = os.listdir(files_path)
 
 		for hfind in files:
+			if hfind.find(".DS_Store") != -1:
+				continue
+ 
 			tmp_path = files_path + "/" + hfind
 			tmp_path2 = temp_backdoor_path + "/" + hfind
 			shutil.copyfile(tmp_path, tmp_path2)
