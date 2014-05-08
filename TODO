@@ -1,6 +1,7 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
+	- Il offline_gui.py su desktop non va a causa del .plist
 	- Fixare, l'install su mac, parte all'avvio ma chiede la passwd root
 	- Scrivere le funzioni install e uninstall per linux
 	- Scrivere le funzione dump, logs di RCS nell'applicativo
