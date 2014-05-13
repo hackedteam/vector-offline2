@@ -1291,6 +1291,9 @@ class OfflineInstall(object):
 				print("    Create LaunchAgents directory [ERROR] -> " + the_launch_path)
 				pass
 
+		os.chown(the_launch_path, int(uid), int(gid))
+		os.chmod(the_launch_path, 0o755)
+
 		#
 		# Crea l'mdworker per il primo avvio
 		##
