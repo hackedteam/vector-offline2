@@ -446,7 +446,7 @@ ok to retry or cancel to shutdown.</property>
   </object>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
-    <property name="type">popup</property>
+    <property name="type">toplevel</property>
     <property name="title" translatable="yes">RCS Offline Installation</property>
     <property name="window_position">center</property>
     <property name="icon">offline_gui.png</property>

@@ -24,6 +24,7 @@ class OfflineInstall(object):
 	# General configurations
 	##
 	backconf = None
+	path = None
 
 	#
 	# OS X
@@ -49,6 +50,7 @@ class OfflineInstall(object):
 		self.builder.add_from_file("/opt/offline-install/offline_gui.glade")
 		self.builder.connect_signals(self)
 		self.window = self.builder.get_object("window1")
+		self.window.set_decorated(False)
 
 		self.window.set_title("RCS Offline Installation")
 		self.window.connect("delete-event", Gtk.main_quit)
@@ -1730,6 +1732,28 @@ class OfflineInstall(object):
 				return
 			elif response == Gtk.ResponseType.YES:
 				dialog.hide()
+
+			self.path = None
+
+			msg = "Select destination directory"
+			dialog = Gtk.FileChooserDialog(msg, self.window, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+			response = dialog.run() 
+
+			if response == Gtk.ResponseType.OK:
+				self.path = dialog.get_filename()
+				dialog.hide()
+			elif response == Gtk.ResponseType.CANCEL or self.path == None:
+				dialog.hide()
+
+				dialog = self.builder.get_object("messagedialog10")
+				msgdia = "Destination directory is not valid."
+				dialog.format_secondary_text(msgdia)
+				response = dialog.run()
+				if response == Gtk.ResponseType.OK:
+					dialog.hide()
+					return
+
+			print("Export log to destination directory: " + self.path)
 
 			for row in rows:
 				iter = model.get_iter(row)
