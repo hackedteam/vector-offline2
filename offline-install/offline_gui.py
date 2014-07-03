@@ -8,6 +8,7 @@ import signal
 import os
 import shutil
 import time
+import datetime
 import json
 
 class OfflineInstall(object):
@@ -385,7 +386,10 @@ class OfflineInstall(object):
 		users = os.listdir('/mnt/Users/')
 
 		for i in users:
-			if i[0] == '.' or i == "shared" or i == "Shared":
+			if i[0] == '.' or i == ".." or i == "shared" or i == "Shared":
+				continue
+
+			if subprocess.check_output("ls -l /mnt/Users/ | grep '{}' | grep -v '^-' | wc -l".format(i), shell=True).decode('utf-8')[:-1] == '0':
 				continue
 
 			uid = None
@@ -1449,7 +1453,9 @@ class OfflineInstall(object):
 					msgdia = "Installation failed for " + user + " user."
 				else:
 					dialog = self.builder.get_object("messagedialog5")
-					msgdia = "Installation successful for " + user + " user!"
+					ts = time.time()
+					st = datetime.datetime.fromtimestamp(ts).strftime('%Y/%m/%d %H:%M:%S')
+					msgdia = "Installation successful for " + user + " user!\n\nAt UTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
@@ -1661,7 +1667,9 @@ class OfflineInstall(object):
 					msgdia = "Uninstallation failed for " + user + " user."
 				else:
 					dialog = self.builder.get_object("messagedialog8")
-					msgdia = "Uninstallation successful for " + user + " user!"
+					ts = time.time()
+					st = datetime.datetime.fromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S")
+					msgdia = "Uninstallation successful for " + user + " user!\n\nAt UTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
@@ -1743,7 +1751,9 @@ class OfflineInstall(object):
 					msgdia = "Export failed for " + user + " user."
 				else:
 					dialog = self.builder.get_object("messagedialog11")
-					msgdia = "Export successful for " + user + " user!"
+					ts = time.time()
+					st = datetime.datetime.fromtimestamp(ts).strftime('%Y/%m/%d %H:%M:%S')
+					msgdia = "Export successful for " + user + " user!\n\nAt UTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
