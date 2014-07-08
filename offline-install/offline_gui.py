@@ -11,6 +11,7 @@ import time
 import datetime
 import json
 import re
+import hashlib
 
 class OfflineInstall(object):
 	builder = None
@@ -418,7 +419,20 @@ class OfflineInstall(object):
 				gid = None
 				pass
 
-			self.useosx.append({'username': i, 'uid': uid, 'gid': gid, 'home': '/Users/' + i, 'fullname': "", 'status': None})
+			ucode = ""
+
+			try:
+				ucode = subprocess.check_output("dmidecode --type 1 | grep -i 'Serial Number' | rev | awk '{{print $1}}' | rev", shell=True).decode('utf-8')[:-1]
+			except:
+				pass
+
+			ucode += i
+
+			m = hashlib.sha1()
+			m.update(ucode.encode('utf-8'))
+			uhash = m.hexdigest()
+
+			self.useosx.append({'username': i, 'uid': uid, 'gid': gid, 'home': '/Users/' + i, 'fullname': "", 'status': None, 'hash': uhash})
 
 		if self.useosx == []:
 			self.useosx = None
@@ -531,7 +545,13 @@ class OfflineInstall(object):
 
 			for u in user:
 				if u == line[0]:
-					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None})
+					ucode = line[0] + self.tablin['osname'] 
+
+					m = hashlib.sha1()
+					m.update(ucode.encode('utf-8'))
+					uhash = m.hexdigest()
+
+					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None, 'hash': uhash})
 
 		if self.uselin == []:
 			self.uselin = None
@@ -1792,7 +1812,12 @@ class OfflineInstall(object):
 		s += "USERID=" + user + "\n"
 		s += "DEVICEID=" + self.tabosx['osname'] + "\n"
 		s += "FACTORY=" + self.backconf['huid'] + "\n"
-		s += "INSTANCE=0\n"
+
+		for i in self.useosx:
+			if i['username'] == user:
+				s += "INSTANCE=" + i['hash'] + "\n"
+				break
+
 		s += "PLATFORM=MACOS\n"
 		s += "SYNCTIME=" + hex_high_dt + "." + hex_low_dt + "\n"
 		f.write(s)
@@ -1826,6 +1851,9 @@ class OfflineInstall(object):
 				print("        Copying file " + str(count) + " of " + str(len(evidence)) + "...")
 				print("          " + source + " -> " + dest)
 				subprocess.call("cp {} {}".format(source, dest), shell=True)
+
+				print("        Removing original file " + source)
+				os.remove(source)
 
 				count += 1
 		else:
