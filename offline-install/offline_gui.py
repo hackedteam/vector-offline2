@@ -487,19 +487,41 @@ class OfflineInstall(object):
 			oscode = "Mountain Lion"
 		elif osversion.find("10.9") != -1:
 			oscode = "Mavericks"
+		elif osversion.find("11.0") != -1:
+			oscode = "Yosemite"
 
 		self.tabosx.update({'oscode': oscode})
 
 		try:
-			osname = subprocess.check_output("awk -F'<|>' '/LocalHostName/ {getline; print$3}' /mnt/Library/Preferences/SystemConfiguration/preferences.plist", shell=True)[:-1].decode('utf-8')
+			osname = subprocess.check_output("grep -A1 '<key>HostName</key>' /mnt/Library/Preferences/SystemConfiguration/preferences.plist | awk -F'<|>' '/HostName/ {getline; print$3}'", shell=True)[:-1].decode('utf-8')
+			if len(osname) == 0:
+				osname = None
 		except:
 			osname = None
 			pass
 
+		if osname == None:
+			try:
+				osname = subprocess.check_output("grep -A1 '<key>LocalHostName</key>' /mnt/Library/Preferences/SystemConfiguration/preferences.plist | awk -F'<|>' '/LocalHostName/ {getline; print$3}'", shell=True)[:-1].decode('utf-8')
+				if len(osname) == 0:
+					osname = None
+			except:
+				osname = None
+				pass
+
+		if osname == None:
+			try:
+				osname = subprocess.check_output("grep -A1 '<key>ComputerName</key>' /mnt/Library/Preferences/SystemConfiguration/preferences.plist | awk -F'<|>' '/ComputerName/ {getline; print$3}'", shell=True)[:-1].decode('utf-8')
+				if len(osname) == 0:
+					osname = None
+			except:
+				osname = None
+				pass
+
 		self.tabosx.update({'osname': osname})
 		self.tabosx.update({'osarch': osarch})
 
-		if osversion.find("10.5") != -1 or osversion.find("10.6") != -1 or osversion.find("10.7") != -1 or osversion.find("10.8") != -1 or osversion.find("10.9") != -1:
+		if osversion.find("10.5") != -1 or osversion.find("10.6") != -1 or osversion.find("10.7") != -1 or osversion.find("10.8") != -1 or osversion.find("10.9") != -1 or osversion.find("11.0") != -1:
 			ossupport = True
 
 		self.tabosx.update({'ossupport': ossupport})
