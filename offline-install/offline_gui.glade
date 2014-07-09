@@ -446,7 +446,6 @@ ok to retry or cancel to shutdown.</property>
   </object>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
-    <property name="type">toplevel</property>
     <property name="title" translatable="yes">RCS Offline Installation</property>
     <property name="window_position">center</property>
     <property name="icon">offline_gui.png</property>
@@ -655,6 +654,35 @@ ok to retry or cancel to shutdown.</property>
           </packing>
         </child>
         <child>
+          <object class="GtkLabel" id="label5">
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">4</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="progressbar1">
+            <property name="can_focus">False</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">4</property>
+            <property name="margin_bottom">4</property>
+            <property name="text" translatable="yes"> </property>
+            <property name="show_text">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkFrame" id="frame2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -761,7 +789,7 @@ ok to retry or cancel to shutdown.</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -813,7 +841,7 @@ ok to retry or cancel to shutdown.</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

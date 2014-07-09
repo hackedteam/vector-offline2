@@ -1,6 +1,5 @@
 TODO Offline Install:
 =====================
-	- Aggiungere barra caricamento per Export Log
 	- Aggiornare offline-install.tar.gz nella ISO
 	- Scrivere le funzioni install e uninstall per linux
 	- Scrivere le funzione export log per linux 

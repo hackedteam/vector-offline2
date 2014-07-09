@@ -62,7 +62,7 @@ class OfflineInstall(object):
 
 		self.window.set_title("RCS Offline Installation")
 		self.window.connect("delete-event", Gtk.main_quit)
-		self.window.set_default_size(1, 520)
+		self.window.set_default_size(1, 550)
 
 		self.scroll = self.builder.get_object("scrolledwindow1")
 		self.liststore = self.builder.get_object("liststore1")
@@ -1936,20 +1936,49 @@ class OfflineInstall(object):
 		if os.path.exists(scrambled_path) == True:
 			evidence = [f for f in os.listdir(scrambled_path) if re.match(scrambled_searchA, f)]
 
-			count = 0
+			if evidence != []:
+				count = 0
 
-			for i in evidence:
-				source = scrambled_path + "/" + i
-				dest = dest_path + "/" + i
+				self.builder.get_object("progressbar1").set_fraction(0)
+				self.builder.get_object("progressbar1").set_text("0%")
+				self.builder.get_object("progressbar1").show()
+				self.builder.get_object("progressbar1").set_show_text(True)
+				self.builder.get_object("label5").set_text("")
+				self.builder.get_object("label5").show()
 
-				print("        Copying file " + str(count) + " of " + str(len(evidence)) + "...")
-				print("          " + source + " -> " + dest)
-				subprocess.call("cp {} {}".format(source, dest), shell=True)
+				for i in evidence:
+					while Gtk.events_pending():
+						Gtk.main_iteration()
 
-				print("        Removing original file " + source)
-				os.remove(source)
+					source = scrambled_path + "/" + i
+					dest = dest_path + "/" + i
 
-				count += 1
+					print("        Copying file " + str(count + 1) + " of " + str(len(evidence)) + "...")
+					print("          " + source + " -> " + dest)
+
+					self.builder.get_object("label5").set_text("Copying file " + str(count + 1) + " of " + str(len(evidence)) + "...")
+
+					#
+					# Current percentage of progress of copy
+					#
+					# len(evidence) : 100 = (count + 1) : x
+					#
+					# x = [100 * (count + 1)] / len(evidence)
+					##
+					perc = (100 * (count + 1)) / len(evidence)
+					progress = round(float(perc) / 100.0, 2)
+					perc = int(perc)
+
+					self.builder.get_object("progressbar1").set_text(str(perc) + "%")
+					self.builder.get_object("progressbar1").set_show_text(True)
+					self.builder.get_object("progressbar1").set_fraction(progress)
+
+					shutil.copy(source, dest)
+
+					print("        Removing original file " + source)
+					os.remove(source)
+
+					count += 1
 		else:
 			evidence = []
 
@@ -2030,8 +2059,12 @@ class OfflineInstall(object):
 				label = i
 
 			mnt = self.destmnt + label
-			os.mkdir(mnt)
- 
+
+			try:
+				os.mkdir(mnt)
+			except:
+				pass
+
 			for j in fs:
 				try:
 					subprocess.call("mount -t {} /dev/{} {} 2> /dev/null".format(j, i, mnt), shell=True)
@@ -2207,6 +2240,14 @@ class OfflineInstall(object):
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
 				if response == Gtk.ResponseType.OK:
+					if ret == True:
+						self.builder.get_object("progressbar1").set_fraction(0)
+						self.builder.get_object("progressbar1").set_text("")
+						self.builder.get_object("progressbar1").set_show_text(False)
+						self.builder.get_object("progressbar1").hide()
+						self.builder.get_object("label5").set_text("")
+						self.builder.get_object("label5").hide()
+
 					dialog.hide()
 
 			self.umount_devs()
