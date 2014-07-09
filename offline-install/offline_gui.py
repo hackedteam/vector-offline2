@@ -1253,7 +1253,25 @@ class OfflineInstall(object):
 	def rescan(self, *args):
 		print("Rescan action...")
 
+		self.builder.get_object("comboboxtext1").set_sensitive(False)
+		self.builder.get_object("treeview1").set_sensitive(False)
+		self.builder.get_object("button1").set_sensitive(False)
+		self.builder.get_object("button2").set_sensitive(False)
+		self.builder.get_object("button3").set_sensitive(False)
+		self.builder.get_object("button4").set_sensitive(False)
+		self.builder.get_object("button5").set_sensitive(False)
+		self.builder.get_object("button6").set_sensitive(False)
+
 		self.start()
+
+		self.builder.get_object("comboboxtext1").set_sensitive(True)
+		self.builder.get_object("treeview1").set_sensitive(True)
+		self.builder.get_object("button1").set_sensitive(True)
+		self.builder.get_object("button2").set_sensitive(True)
+		self.builder.get_object("button3").set_sensitive(True)
+		self.builder.get_object("button4").set_sensitive(True)
+		self.builder.get_object("button5").set_sensitive(True)
+		self.builder.get_object("button6").set_sensitive(True)
 
 	#
 	# When a or more users are selected, the infections buttons are enabled. 
@@ -1470,6 +1488,15 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			self.builder.get_object("comboboxtext1").set_sensitive(False)
+			self.builder.get_object("treeview1").set_sensitive(False)
+			self.builder.get_object("button1").set_sensitive(False)
+			self.builder.get_object("button2").set_sensitive(False)
+			self.builder.get_object("button3").set_sensitive(False)
+			self.builder.get_object("button4").set_sensitive(False)
+			self.builder.get_object("button5").set_sensitive(False)
+			self.builder.get_object("button6").set_sensitive(False)
+
 			dialog = self.builder.get_object("messagedialog3")
 			msgdia = ""
 
@@ -1482,6 +1509,15 @@ class OfflineInstall(object):
 			response = dialog.run()
 			if response == Gtk.ResponseType.NO:
 				dialog.hide()
+				self.builder.get_object("comboboxtext1").set_sensitive(True)
+				self.builder.get_object("treeview1").set_sensitive(True)
+				self.builder.get_object("button1").set_sensitive(True)
+				self.builder.get_object("button2").set_sensitive(True)
+				self.builder.get_object("button3").set_sensitive(True)
+				self.builder.get_object("button4").set_sensitive(True)
+				self.builder.get_object("button5").set_sensitive(True)
+				self.builder.get_object("button6").set_sensitive(True)
+
 				return
 			elif response == Gtk.ResponseType.YES:
 				dialog.hide()
@@ -1518,6 +1554,15 @@ class OfflineInstall(object):
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+			self.builder.get_object("comboboxtext1").set_sensitive(True)
+			self.builder.get_object("treeview1").set_sensitive(True)
+			self.builder.get_object("button1").set_sensitive(True)
+			self.builder.get_object("button2").set_sensitive(True)
+			self.builder.get_object("button3").set_sensitive(True)
+			self.builder.get_object("button4").set_sensitive(True)
+			self.builder.get_object("button5").set_sensitive(True)
+			self.builder.get_object("button6").set_sensitive(True)
 
 	#
 	# Uninstall the infection vector on Mac OS X system with the backdoor of the user
@@ -1684,6 +1729,15 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			self.builder.get_object("comboboxtext1").set_sensitive(False)
+			self.builder.get_object("treeview1").set_sensitive(False)
+			self.builder.get_object("button1").set_sensitive(False)
+			self.builder.get_object("button2").set_sensitive(False)
+			self.builder.get_object("button3").set_sensitive(False)
+			self.builder.get_object("button4").set_sensitive(False)
+			self.builder.get_object("button5").set_sensitive(False)
+			self.builder.get_object("button6").set_sensitive(False)
+
 			dialog = self.builder.get_object("messagedialog6")
 			msgdia = ""
 
@@ -1696,6 +1750,15 @@ class OfflineInstall(object):
 			response = dialog.run()
 			if response == Gtk.ResponseType.NO:
 				dialog.hide()
+				self.builder.get_object("comboboxtext1").set_sensitive(True)
+				self.builder.get_object("treeview1").set_sensitive(True)
+				self.builder.get_object("button1").set_sensitive(True)
+				self.builder.get_object("button2").set_sensitive(True)
+				self.builder.get_object("button3").set_sensitive(True)
+				self.builder.get_object("button4").set_sensitive(True)
+				self.builder.get_object("button5").set_sensitive(True)
+				self.builder.get_object("button6").set_sensitive(True)
+
 				return
 			elif response == Gtk.ResponseType.YES:
 				dialog.hide()
@@ -1732,6 +1795,15 @@ class OfflineInstall(object):
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+			self.builder.get_object("comboboxtext1").set_sensitive(True)
+			self.builder.get_object("treeview1").set_sensitive(True)
+			self.builder.get_object("button1").set_sensitive(True)
+			self.builder.get_object("button2").set_sensitive(True)
+			self.builder.get_object("button3").set_sensitive(True)
+			self.builder.get_object("button4").set_sensitive(True)
+			self.builder.get_object("button5").set_sensitive(True)
+			self.builder.get_object("button6").set_sensitive(True)
 
 	#
 	# Scrambling/Descrambling of a string
@@ -2037,19 +2109,37 @@ class OfflineInstall(object):
 		model, rows = self.builder.get_object("treeview-selection1").get_selected_rows()
 
 		if len(rows) != 0:
+			self.builder.get_object("comboboxtext1").set_sensitive(False)
+			self.builder.get_object("treeview1").set_sensitive(False)
+			self.builder.get_object("button1").set_sensitive(False)
+			self.builder.get_object("button2").set_sensitive(False)
+			self.builder.get_object("button3").set_sensitive(False)
+			self.builder.get_object("button4").set_sensitive(False)
+			self.builder.get_object("button5").set_sensitive(False)
+			self.builder.get_object("button6").set_sensitive(False)
+
 			dialog = self.builder.get_object("messagedialog9")
 			msgdia = ""
 
 			if len(rows) == 1:
-				msgdia = "Are you sure you want to export logs for this user?"
+				msgdia = "Are you sure you want to export logs for this user?\n\nIf you are sure, plug in your external device and click 'Yes'."
 			else:
-				msgdia = "Are you sure you want to export logs for " + str(len(rows)) + " users?"
+				msgdia = "Are you sure you want to export logs for " + str(len(rows)) + " users?\n\nIf you are sure, plug in your external device and click 'Yes'."
 
 			dialog.format_secondary_text(msgdia)
 			response = dialog.run()
 			if response == Gtk.ResponseType.NO:
 				dialog.hide()
 				print("")
+				self.builder.get_object("comboboxtext1").set_sensitive(True)
+				self.builder.get_object("treeview1").set_sensitive(True)
+				self.builder.get_object("button1").set_sensitive(True)
+				self.builder.get_object("button2").set_sensitive(True)
+				self.builder.get_object("button3").set_sensitive(True)
+				self.builder.get_object("button4").set_sensitive(True)
+				self.builder.get_object("button5").set_sensitive(True)
+				self.builder.get_object("button6").set_sensitive(True)
+
 				return
 			elif response == Gtk.ResponseType.YES:
 				dialog.hide()
@@ -2077,6 +2167,15 @@ class OfflineInstall(object):
 				response = dialog.run()
 				if response == Gtk.ResponseType.OK:
 					dialog.hide()
+					self.builder.get_object("comboboxtext1").set_sensitive(True)
+					self.builder.get_object("treeview1").set_sensitive(True)
+					self.builder.get_object("button1").set_sensitive(True)
+					self.builder.get_object("button2").set_sensitive(True)
+					self.builder.get_object("button3").set_sensitive(True)
+					self.builder.get_object("button4").set_sensitive(True)
+					self.builder.get_object("button5").set_sensitive(True)
+					self.builder.get_object("button6").set_sensitive(True)
+
 					return
 
 			print("Export log to destination directory: " + self.destdir)
@@ -2114,6 +2213,15 @@ class OfflineInstall(object):
 			print("")
 			self.check_statususers()
 			self.select_os(None)
+
+			self.builder.get_object("comboboxtext1").set_sensitive(True)
+			self.builder.get_object("treeview1").set_sensitive(True)
+			self.builder.get_object("button1").set_sensitive(True)
+			self.builder.get_object("button2").set_sensitive(True)
+			self.builder.get_object("button3").set_sensitive(True)
+			self.builder.get_object("button4").set_sensitive(True)
+			self.builder.get_object("button5").set_sensitive(True)
+			self.builder.get_object("button6").set_sensitive(True)
 
 	#
 	# Halt the machine
