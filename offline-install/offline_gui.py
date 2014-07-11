@@ -1544,7 +1544,7 @@ class OfflineInstall(object):
 					dialog = self.builder.get_object("messagedialog5")
 					ts = time.time()
 					st = datetime.datetime.fromtimestamp(ts).strftime('%Y/%m/%d %H:%M:%S')
-					msgdia = "Installation successful for " + user + " user!\n\nAt UTC time: " + st
+					msgdia = "Installation successful for " + user + " user at\nUTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
@@ -1785,7 +1785,7 @@ class OfflineInstall(object):
 					dialog = self.builder.get_object("messagedialog8")
 					ts = time.time()
 					st = datetime.datetime.fromtimestamp(ts).strftime("%Y/%m/%d %H:%M:%S")
-					msgdia = "Uninstallation successful for " + user + " user!\n\nAt UTC time: " + st
+					msgdia = "Uninstallation successful for " + user + " user at\nUTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
@@ -1932,6 +1932,35 @@ class OfflineInstall(object):
 			print("      Export logs [ERROR] -> " + user + " on Mac OS X system!")
 			shutil.rmtree(dest_path)
 			return False 
+
+		#
+		# Check if the external device is full or empty for evidence copy files
+		##
+		drive_space = 0
+		evidence_space = 0
+
+		try:
+			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(self.destdir), shell=True).decode('utf-8')[:-1])
+		except:
+			pass
+
+		try:
+			evidence_space = int(subprocess.check_output("du -k '{}' | awk '{{print $1}}'".format(scrambled_path), shell=True).decode('utf-8')[:-1])
+		except:
+			pass
+
+		diff_space = drive_space - evidence_space
+
+		if diff_space <= 0:
+			print("      Export logs [ERROR] -> No enough space for evidence in to external drive for " + user + " on Mac OS X system!")
+			shutil.rmtree(dest_path)
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			return None 
 
 		if os.path.exists(scrambled_path) == True:
 			evidence = [f for f in os.listdir(scrambled_path) if re.match(scrambled_searchA, f)]
@@ -2231,11 +2260,14 @@ class OfflineInstall(object):
 				if ret == False:
 					dialog = self.builder.get_object("messagedialog10")
 					msgdia = "Export failed for " + user + " user."
+				elif ret == None:
+					dialog = self.builder.get_object("messagedialog10")
+					msgdia = "Export failed for " + user + " user because there\nis not enough space in your external drive."
 				else:
 					dialog = self.builder.get_object("messagedialog11")
 					ts = time.time()
 					st = datetime.datetime.fromtimestamp(ts).strftime('%Y/%m/%d %H:%M:%S')
-					msgdia = "Export successful for " + user + " user!\n\nAt UTC time: " + st
+					msgdia = "Export successful for " + user + " user at\nUTC time: " + st
 
 				dialog.format_secondary_text(msgdia)
 				response = dialog.run()
