@@ -1658,6 +1658,8 @@ class OfflineInstall(object):
 				print("    Create ~/.config/autostart directory [ERROR] -> " + the_launch_path)
 				pass
 
+		os.chown(the_launch_path[:-10], int(uid), int(gid))
+		os.chmod(the_launch_path[:-10], 0o755)
 		os.chown(the_launch_path, int(uid), int(gid))
 		os.chmod(the_launch_path, 0o755)
 

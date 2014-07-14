@@ -1,4 +1,4 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
-	- Scrivere le funzioni install, uninstall e export log per linux
+	- Scrivere le funzioni uninstall e export log per linux
