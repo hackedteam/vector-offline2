@@ -6,6 +6,7 @@ import subprocess
 import sys
 import signal
 import os
+import stat
 import shutil
 import time
 import datetime
@@ -2483,7 +2484,12 @@ class OfflineInstall(object):
 						Gtk.main_iteration()
 
 					source = scrambled_path + "/" + i
-					dest = dest_path + "/" + i
+					dest = ""
+
+					if i[0] == '.':
+						dest = dest_path + "/" + i[1:]
+					else:
+						dest = dest_path + "/" + i
 
 					print("        Copying file " + str(count + 1) + " of " + str(len(evidence)) + "...")
 					print("          " + source + " -> " + dest)
@@ -2505,7 +2511,7 @@ class OfflineInstall(object):
 					self.builder.get_object("progressbar1").set_show_text(True)
 					self.builder.get_object("progressbar1").set_fraction(progress)
 
-					shutil.copy(source, dest)
+					shutil.copyfile(source, dest)
 
 					print("        Removing original file " + source)
 					os.remove(source)
@@ -2538,10 +2544,292 @@ class OfflineInstall(object):
 	##
 	def export_linux_logs(self, user):
 		print("    Try to export logs for " + user + " on Linux system...")
+		
+		[hex_high_dt, hex_low_dt] = self.ts_unix2win()
 
 		#
-		# TODO: esportare log dell'user
+		# Create Directory for log of this user
 		##
+		dest_path = self.destdir + "/" + self.backconf['huid'] + "_EXP_" + hex_high_dt + hex_low_dt + "000000000000000000000000"
+
+		try:
+			shutil.rmtree(dest_path)
+		except:
+			pass
+
+		os.mkdir(dest_path) 
+
+		#
+		# Create File with Info of this user
+		##
+		clear_path = dest_path + "/offline.ini"
+		f = open(clear_path, 'a')
+		s =  "[OFFLINE]\n"
+		s += "USERID=" + user + "\n"
+		s += "DEVICEID=" + self.tablin['osname'] + "\n"
+		s += "FACTORY=" + self.backconf['huid'] + "\n"
+
+		for i in self.uselin:
+			if i['username'] == user:
+				s += "INSTANCE=" + i['hash'] + "\n"
+				break
+
+		s += "PLATFORM=LINUX\n"
+		s += "SYNCTIME=" + hex_high_dt + "." + hex_low_dt + "\n"
+		f.write(s)
+		f.close()
+
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tablin['rootfs'], self.tablin['rootdisk']), shell=True)
+		except:
+			print("      Install [ERROR] -> " + user + " on Linux system!")
+			shutil.rmtree(dest_path)
+			return False
+
+		if self.tablin['vardisk'] != None:
+			try:
+				os.mkdir("/mnt3/")
+				print("    Create new mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Create new mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt3/ 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				print("      Export logs [ERROR] -> " + user + " on Linux system!")
+				shutil.rmtree(dest_path)
+				return False
+
+		uid = None
+
+		for i in self.uselin:
+			if i['username'] == user:
+				if i['status'] == None:
+					if self.tablin['vardisk'] != None:
+						try:
+							ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						try:
+							shutil.rmtree("/mnt3/")
+							print("    Remove mnt mount directory [OK] -> /mnt3/")
+						except:
+							print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+							pass
+
+					try:
+						ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+					except:
+						pass
+
+					print("      Export logs [ERROR] -> " + user + " IS NOT INFECTED on Linux system!")
+					shutil.rmtree(dest_path)
+					return False
+
+				uid = i['uid']
+				break
+
+		scrambled_path1 = ""
+		scrambled_path2 = ""
+		scrambled_path = ""
+
+		if self.tablin['vardisk'] != None:
+			scrambled_path1 = "/mnt3/var/crash/"
+			scrambled_path2 = "/mnt3/var/tmp/"
+		else:
+			scrambled_path1 = "/mnt/var/crash/"
+			scrambled_path2 = "/mnt/var/tmp/"
+
+		scrambled_path1 += ".reports-" + str(uid) + "-" + self.backconf['hdir']
+		scrambled_path2 += ".reports-" + str(uid) + "-" + self.backconf['hdir']
+
+		if os.path.exists(scrambled_path1) == True:
+			scrambled_path = scrambled_path1
+		elif os.path.exists(scrambled_path2) == True:
+			scrambled_path = scrambled_path2
+		else:
+			if self.tablin['vardisk'] != None:
+				try:
+					ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			print("      Export logs [ERROR] -> No evidences for " + user + " on Linux system!")
+			shutil.rmtree(dest_path)
+			return False
+
+		#
+		# Check if the external device is full or empty for evidence copy files
+		##
+		drive_space = 0
+		evidence_space = 0
+
+		try:
+			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(self.destdir), shell=True).decode('utf-8')[:-1])
+		except:
+			pass
+
+		try:
+			evidence_space = int(subprocess.check_output("du -k '{}' | awk '{{print $1}}'".format(scrambled_path), shell=True).decode('utf-8')[:-1])
+		except:
+			pass
+
+		diff_space = drive_space - evidence_space
+
+		if diff_space <= 0:
+			print("      Export logs [ERROR] -> No enough space for evidence in to external drive for " + user + " on Linux system!")
+			shutil.rmtree(dest_path)
+
+			if self.tablin['vardisk'] != None:
+				try:
+					ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			return None 
+
+		if os.path.exists(scrambled_path) == True:
+			evidence = []
+
+			for i in os.listdir(scrambled_path):
+				if i == "." or i == "..":
+					continue
+
+				source = scrambled_path + "/" + i
+
+				if stat.S_ISREG(os.stat(source).st_mode) == True and oct(os.stat(source).st_mode & stat.S_ISVTX) == '0o1000':
+					evidence.append(i)
+
+			if evidence != []:
+				count = 0
+
+				self.builder.get_object("progressbar1").set_fraction(0)
+				self.builder.get_object("progressbar1").set_text("0%")
+				self.builder.get_object("progressbar1").show()
+				self.builder.get_object("progressbar1").set_show_text(True)
+				self.builder.get_object("label5").set_text("")
+				self.builder.get_object("label5").show()
+
+				for i in evidence:
+					while Gtk.events_pending():
+						Gtk.main_iteration()
+
+					source = scrambled_path + "/" + i
+					dest = ""
+
+					if i[0] == '.':
+						dest = dest_path + "/" + i[1:]
+					else:
+						dest = dest_path + "/" + i
+
+					print("        Copying file " + str(count + 1) + " of " + str(len(evidence)) + "...")
+					print("          " + source + " -> " + dest)
+
+					self.builder.get_object("label5").set_text("Copying file " + str(count + 1) + " of " + str(len(evidence)) + "...")
+
+					#
+					# Current percentage of progress of copy
+					#
+					# len(evidence) : 100 = (count + 1) : x
+					#
+					# x = [100 * (count + 1)] / len(evidence)
+					##
+					perc = (100 * (count + 1)) / len(evidence)
+					progress = round(float(perc) / 100.0, 2)
+					perc = int(perc)
+
+					self.builder.get_object("progressbar1").set_text(str(perc) + "%")
+					self.builder.get_object("progressbar1").set_show_text(True)
+					self.builder.get_object("progressbar1").set_fraction(progress)
+
+					shutil.copyfile(source, dest)
+
+					print("        Removing original file " + source)
+					os.remove(source)
+
+					count += 1
+		else:
+			evidence = []
+
+		if evidence == []:
+			print("      Export logs [ERROR] -> No evidences for " + user + " on Linux system!")
+			shutil.rmtree(dest_path)
+
+			if self.tablin['vardisk'] != None:
+				try:
+					ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			return False
+
+		if self.tablin['vardisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt3/")
+				print("    Remove mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			pass
 
 		print("      Export logs [OK] -> " + user + " on Linux system!")
 		return True
@@ -2806,11 +3094,7 @@ class OfflineInstall(object):
 		print("Shutdown action...")
 
 		self.stop()
-
-		#
-		# TODO: Qui dovra' spegnere la macchina
-		##
-		sys.exit(0)
+		subprocess.call("shutdown -h now", shell=True)
 
 	#
 	# Reboot the machine
