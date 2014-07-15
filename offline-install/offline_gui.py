@@ -2029,9 +2029,196 @@ class OfflineInstall(object):
 	def uninstall_linux_backdoor(self, user):
 		print("    Try to uninstall the backdoor for " + user + " on Linux system...")
 
+		try:
+			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tablin['rootfs'], self.tablin['rootdisk']), shell=True)
+		except:
+			print("      Uninstall [ERROR] -> " + user + " on Linux system!")
+			return False
+
+		if self.tablin['homedisk'] != None:
+			try:
+				os.mkdir("/mnt2/")
+				print("    Create new mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Create new mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt2/")
+					print("    Remove mnt mount directory [OK] -> /mnt2/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+					pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				print("      Uninstall [ERROR] -> " + user + " on Linux system!")
+				return False
+
+		if self.tablin['vardisk'] != None:
+			try:
+				os.mkdir("/mnt3/")
+				print("    Create new mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Create new mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt3/ 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt3/")
+					print("    Remove mnt mount directory [OK] -> /mnt3/")
+				except:
+					print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+					pass
+
+				if self.tablin['homedisk'] != None:
+					try:
+						ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+					except:
+						pass
+
+					try:
+						shutil.rmtree("/mnt2/")
+						print("    Remove mnt mount directory [OK] -> /mnt2/")
+					except:
+						print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+						pass
+
+				try:
+					ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+				except:
+					pass
+
+				print("      Uninstall [ERROR] -> " + user + " on Linux system!")
+				return False
+
+		home = None
+		uid = None
+
+		for i in self.uselin:
+			if i['username'] == user:
+				if i['status'] == None:
+					if self.tablin['vardisk'] != None:
+						try:
+							ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						try:
+							shutil.rmtree("/mnt3/")
+							print("    Remove mnt mount directory [OK] -> /mnt3/")
+						except:
+							print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+							pass
+
+					if self.tablin['homedisk'] != None:
+						try:
+							ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						try:
+							shutil.rmtree("/mnt2/")
+							print("    Remove mnt mount directory [OK] -> /mnt2/")
+						except:
+							print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+							pass
+
+					try:
+						ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+					except:
+						pass
+
+					print("      Uninstall [ERROR] -> " + user + " IS NOT INFECTED on Linux system!")
+					return False
+
+				home = i['home']
+				uid = i['uid']
+				break
+
 		#
-		# TODO: disinfettare l'user
+		# Cancella il .desktop del primo avvio della backdoor
 		##
+		backdoor_path = ""
+
+		if self.tablin['homedisk'] != None:
+			backdoor_path = "/mnt2"
+		else:
+			backdoor_path = "/mnt"
+
+		backdoor_path += home + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+		try:
+			os.remove(backdoor_path)
+			print("    Remove [OK] -> " + backdoor_path)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path)
+			pass
+
+		#
+		# Cancella tutti i file e la directory
+		##
+		backdoor_path = ""
+
+		if self.tablin['vardisk'] != None:
+			backdoor_path = "/mnt3"
+		else:
+			backdoor_path = "/mnt"
+
+		backdoor_path1 = backdoor_path + "/var/crash/.reports-" + str(uid) + "-" + self.backconf['hdir']
+		backdoor_path2 = backdoor_path + "/var/tmp/.reports-" + str(uid) + "-" + self.backconf['hdir']
+
+		try:
+			shutil.rmtree(backdoor_path1)
+			print("    Remove [OK] -> " + backdoor_path1)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path1)
+			pass
+
+		try:
+			shutil.rmtree(backdoor_path2)
+			print("    Remove [OK] -> " + backdoor_path2)
+		except:
+			print("    Remove [ERROR] -> " + backdoor_path2)
+			pass
+
+		if self.tablin['vardisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt3/")
+				print("    Remove mnt mount directory [OK] -> /mnt3/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt3/")
+				pass
+
+		if self.tablin['homedisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt2/")
+				print("    Remove mnt mount directory [OK] -> /mnt2/")
+			except:
+				print("    Remove mnt mount directory [ERROR] -> /mnt2/")
+				pass
+
+		try:
+			ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+		except:
+			pass
 
 		print("      Uninstall [OK] -> " + user + " on Linux system!")
 		return True
