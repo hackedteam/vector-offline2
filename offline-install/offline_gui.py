@@ -1697,7 +1697,7 @@ class OfflineInstall(object):
 		the_backdoor_exec = ""
 
 		if the_backdoor_path.find("/mnt3/") != -1:
-			the_backdoor_exec = the_backdoor_run[5:]
+			the_backdoor_exec = "/var" + the_backdoor_run[5:]
 		else:
 			the_backdoor_exec = the_backdoor_run[4:]
 
