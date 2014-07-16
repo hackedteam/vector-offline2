@@ -260,27 +260,29 @@ class OfflineInstall(object):
 
 					self.exsosx = True
 				elif i[0] == 'linux':
-					ret = int(subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i UUID | wc -l", shell=True)[:-1])
-					uuid_sup = None
+					if os.path.exists("/mnt/etc/fstab") == True:
+						for j in tablefs:
+							ret = int(subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i UUID | wc -l", shell=True)[:-1])
+							uuid_sup = None
 
-					if ret != 0:
-						uuid_sup = "UUID"
-						uuid = subprocess.check_output("blkid | grep -i '{}' | awk '{{print $2}}'".format(i[1]), shell=True)[6:-2].decode('utf-8')
-						mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
+							if ret != 0:
+								uuid_sup = "UUID"
+								uuid = subprocess.check_output("blkid | grep -i '{}' | awk '{{print $2}}'".format(j[1]), shell=True)[6:-2].decode('utf-8')
+								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
 
-						if len(mountpoint) == 0:
-							uuid_sup = "UUID MALFORMED"
-							mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
-					else:
-						uuid_sup = "NO UUID"
-						mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(i[1]), shell=True)[:-1].decode('utf-8')
+								if len(mountpoint) == 0:
+									uuid_sup = "UUID MALFORMED"
+									mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+							else:
+								uuid_sup = "NO UUID"
+								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
 
-					if len(mountpoint) != 0:
-						print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
+							if len(mountpoint) != 0:
+								print("  Found: " + j[0] + " -> /dev/" + j[1] + " -> " + j[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
+								self.exslin = True
+								tablemount.append([j[0], j[1], j[2], mountpoint])
+
 						self.exslin = True
-						tablemount.append([i[0], i[1], i[2], mountpoint])
-
-					self.exslin = True
 			except:
 				pass
 
@@ -331,11 +333,11 @@ class OfflineInstall(object):
 				tablelinux.update({'rootdisk': i[1]})
 				tablelinux.update({'rootfs': i[2]})
 				tablelinux.update({'rootmount': i[3]})
-			elif i[2] == 'linux' and i[3] == ('/home' or '/home/'):
+			elif i[0] == 'linux' and i[3] == ('/home' or '/home/'):
 				tablelinux.update({'homedisk': i[1]})
 				tablelinux.update({'homefs': i[2]})
 				tablelinux.update({'homemount': i[3]})
-			elif i[2] == 'linux' and i[3] == ('/var' or '/var/'):
+			elif i[0] == 'linux' and i[3] == ('/var' or '/var/'):
 				tablelinux.update({'vardisk': i[1]})
 				tablelinux.update({'varfs': i[2]})
 				tablelinux.update({'varmount': i[3]})
@@ -558,7 +560,12 @@ class OfflineInstall(object):
 
 		print("    Check Linux system users...")
 
-		users = os.listdir('/mnt/home/')
+		users = None
+
+		if self.tablin['homedisk'] == None:
+			users = os.listdir('/mnt/home/')
+		else:
+			users = os.listdir('/mnt2/')
 
 		for i in users:
 			user.append(i)
@@ -601,6 +608,18 @@ class OfflineInstall(object):
 		except:
 			print("    Not found: Linux system configuration")
 			return False
+
+		if self.tablin['homedisk'] != None:
+			try:
+				os.mkdir("/mnt2")
+			except:
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+			except:
+				print("    Not found: Linux system configuration")
+				return False
 
 		if os.path.exists('/mnt/etc/lsb-release') == True:
 			distros = ['Ubuntu', 'Mint', 'Mageia']
@@ -670,6 +689,18 @@ class OfflineInstall(object):
 			print("      Not found: Linux system users")
 		else:
 			print("      Found: Linux system users")
+
+		if self.tablin['homedisk'] != None:
+			try:
+				ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+			except:
+				print("    Not found: Linux system configuration")
+				return False
+
+			try:
+				shutil.rmtree("/mnt2")
+			except:
+				pass
 
 		try:
 			 ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
@@ -979,8 +1010,18 @@ class OfflineInstall(object):
 
 		if self.tablin['homefs'] != None:
 			try:
-				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/home 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+				os.mkdir("/mnt2")
 			except:
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt2/ 2> /dev/null".format(self.tablin['homefs'], self.tablin['homedisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt2")
+				except:
+					pass
+
 				try:
 					ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
 				except:
@@ -989,11 +1030,26 @@ class OfflineInstall(object):
 
 		if self.tablin['varfs'] != None:
 			try:
-				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/var 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+				os.mkdir("/mnt3")
 			except:
+				pass
+
+			try:
+				ret = subprocess.check_output("mount -t {} /dev/{} /mnt3/ 2> /dev/null".format(self.tablin['varfs'], self.tablin['vardisk']), shell=True)
+			except:
+				try:
+					shutil.rmtree("/mnt3")
+				except:
+					pass
+
 				if self.tablin['homefs'] != None:
 					try:
-						ret = subprocess.check_output("umount /mnt/home 2> /dev/null", shell=True)
+						ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+					except:
+						pass
+
+					try:
+						shutil.rmtree("/mnt2")
 					except:
 						pass
 
@@ -1001,6 +1057,7 @@ class OfflineInstall(object):
 					ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
 				except:
 					pass
+
 				return
 
 		count = 0
@@ -1013,15 +1070,32 @@ class OfflineInstall(object):
 
 			print("    Check " + i['username'] + " user...")
 
-			backdoor_path1 = "/mnt/var/crash/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			backdoor_path1 = ""
+
+			if self.tablin['vardisk'] == None:
+				backdoor_path1 = "/mnt/var/crash/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			else:
+				backdoor_path1 = "/mnt3/crash/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+
 			backdoor_core_path1 = backdoor_path1 + "/whoopsie-report"
 			backdoor_conf_path1 = backdoor_path1 + "/.cache"
 
-			backdoor_path2 = "/mnt/var/tmp/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			backdoor_path2 = ""
+
+			if self.tablin['vardisk'] == None:
+				backdoor_path2 = "/mnt/var/tmp/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+			else:
+				backdoor_path2 = "/mnt3/tmp/.reports-" + i['uid'] + '-' + self.backconf['hdir']
+
 			backdoor_core_path2 = backdoor_path2 + "/whoopsie-report"
 			backdoor_conf_path2 = backdoor_path2 + "/.cache"
-			
-			backdoor_start_path = "/mnt" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+
+			backdoor_start_path = ""
+
+			if self.tablin['homedisk'] == None:			
+				backdoor_start_path = "/mnt" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
+			else:
+				backdoor_start_path = "/mnt2" + i['home'] + "/.config/autostart/.whoopsie-" + self.backconf['hdir'] + ".desktop"
 
 			print("      -> " + backdoor_path1)
 			print("      -> " + backdoor_core_path1)
@@ -1067,13 +1141,23 @@ class OfflineInstall(object):
 
 		if self.tablin['varfs'] != None:
 			try:
-				ret = subprocess.check_output("umount /mnt/var 2> /dev/null", shell=True)
+				ret = subprocess.check_output("umount /mnt3/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt3")
 			except:
 				pass
 
 		if self.tablin['homefs'] != None:
 			try:
-				ret = subprocess.check_output("umount /mnt/home 2> dev/null", shell=True)
+				ret = subprocess.check_output("umount /mnt2/ 2> /dev/null", shell=True)
+			except:
+				pass
+
+			try:
+				shutil.rmtree("/mnt2")
 			except:
 				pass
 
@@ -1598,10 +1682,10 @@ class OfflineInstall(object):
 		the_launch_path = ""
 
 		if self.tablin['vardisk'] != None:
-			if os.path.exists("/mnt3/var/crash/") == True:
-				the_backdoor_path = "/mnt3/var/crash/"
+			if os.path.exists("/mnt3/crash/") == True:
+				the_backdoor_path = "/mnt3/crash/"
 			else:
-				the_backdoor_path = "/mnt3/var/tmp/"
+				the_backdoor_path = "/mnt3/tmp/"
 		else:
 			if os.path.exists("/mnt/var/crash/") == True:
 				the_backdoor_path = "/mnt/var/crash/"
@@ -2167,14 +2251,17 @@ class OfflineInstall(object):
 		# Cancella tutti i file e la directory
 		##
 		backdoor_path = ""
+		backdoor_path1 = ""
+		backdoor_path2 = ""
 
 		if self.tablin['vardisk'] != None:
 			backdoor_path = "/mnt3"
+			backdoor_path1 = backdoor_path + "/crash/.reports-" + str(uid) + "-" + self.backconf['hdir']
+			backdoor_path2 = backdoor_path + "/tmp/.reports-" + str(uid) + "-" + self.backconf['hdir']
 		else:
 			backdoor_path = "/mnt"
-
-		backdoor_path1 = backdoor_path + "/var/crash/.reports-" + str(uid) + "-" + self.backconf['hdir']
-		backdoor_path2 = backdoor_path + "/var/tmp/.reports-" + str(uid) + "-" + self.backconf['hdir']
+			backdoor_path1 = backdoor_path + "/var/crash/.reports-" + str(uid) + "-" + self.backconf['hdir']
+			backdoor_path2 = backdoor_path + "/var/tmp/.reports-" + str(uid) + "-" + self.backconf['hdir']
 
 		try:
 			shutil.rmtree(backdoor_path1)
@@ -2648,8 +2735,8 @@ class OfflineInstall(object):
 		scrambled_path = ""
 
 		if self.tablin['vardisk'] != None:
-			scrambled_path1 = "/mnt3/var/crash/"
-			scrambled_path2 = "/mnt3/var/tmp/"
+			scrambled_path1 = "/mnt3/crash/"
+			scrambled_path2 = "/mnt3/tmp/"
 		else:
 			scrambled_path1 = "/mnt/var/crash/"
 			scrambled_path2 = "/mnt/var/tmp/"
