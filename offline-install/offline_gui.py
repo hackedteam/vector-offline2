@@ -404,7 +404,10 @@ class OfflineInstall(object):
 			if i[0] == '.' or i == ".." or i == "shared" or i == "Shared":
 				continue
 
-			if subprocess.check_output("ls -l /mnt/Users/ | grep '{}' | grep -v '^-' | wc -l".format(i), shell=True).decode('utf-8')[:-1] == '0':
+			if subprocess.check_output("ls -l /mnt/Users/ | grep '{}' | grep -i '^d' | wc -l".format(i), shell=True).decode('utf-8')[:-1] == '0':
+				continue
+
+			if os.path.exists("/mnt/Users/" + i + "/Library/Preferences/") == False:
 				continue
 
 			uid = None
@@ -3179,8 +3182,7 @@ class OfflineInstall(object):
 		print("Shutdown action...")
 
 		self.stop()
-#TODO		subprocess.call("shutdown -h now", shell=True)
-		sys.exit(0)
+		subprocess.call("shutdown -h now", shell=True)
 
 	#
 	# Reboot the machine
