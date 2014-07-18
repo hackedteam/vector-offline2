@@ -429,11 +429,11 @@
 
 	SE SI USA XBOOT, MODIFICARE:
 
-	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p
 
 	CON:
 
-	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- iso-scan/filename=/images/<name>.iso
+	append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p iso-scan/filename=/images/<name>.iso
 
  	CON <name>.iso IN NOME FINALE DELLA ISO DUAL BOOT CON MKISOFS.iso OVVERO offlineinstalllin
 
@@ -522,11 +522,11 @@ exit
 
         SE SI USA XBOOT, MODIFICARE:
 
-        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p
 
         CON:
 
-        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- iso-scan/filename=/images/<name>.iso
+        append  file=/cdrom/preseed/ubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash -- reboot=p iso-scan/filename=/images/<name>.iso
 
         CON <name>.iso IN NOME FINALE DELLA ISO DUAL BOOT CON MKISOFS.iso OVVERO offlineinstalllin
 
