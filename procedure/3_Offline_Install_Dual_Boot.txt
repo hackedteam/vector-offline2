@@ -63,7 +63,7 @@
 		$ mkdir -p DualBootISO/Content
 		$ sudo mount -t iso9660 -o ro xboot.iso /media/
 		$ cp -Rf /media/* DualBootISO/Content/
-		$ umount /media
+		$ sudo umount /media
 		$ cd DualBootISO/Content/
 		$ sudo bash
 		$ chmod +w menu.lst
