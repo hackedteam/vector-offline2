@@ -578,13 +578,24 @@ class OfflineInstall(object):
 
 			for u in user:
 				if u == line[0]:
+					if ("/home/" + line[0]) != line[5]:
+						break
+
+					if self.tablin['homedisk'] == None:
+						if subprocess.check_output("ls -l /mnt/home/ | grep '{}' | grep -i '^d' | wc -l".format(line[0]), shell=True).decode('utf-8')[:-1] == '0':
+							break
+					else:
+						if subprocess.check_output("ls -l /mnt2/ | grep '{}' | grep -i '^d' | wc -l".format(line[0]), shell=True).decode('utf-8')[:-1] == '0':
+							break
+
 					ucode = line[0] + self.tablin['osname'] 
 
 					m = hashlib.sha1()
 					m.update(ucode.encode('utf-8'))
 					uhash = m.hexdigest()
 
-					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': "/home/" + line[0], 'fullname': line[4].replace(",", ""), 'status': None, 'hash': uhash})
+					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': line[5], 'fullname': line[4].replace(",", ""), 'status': None, 'hash': uhash})
+					break
 
 		if self.uselin == []:
 			self.uselin = None
