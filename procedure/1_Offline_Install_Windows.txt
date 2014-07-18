@@ -49,7 +49,7 @@ Procedura generale: http://rcs-dev.hackingteam.it/trac/wiki/Experimental%20Offli
 
 	ia64 -> Dism /Mount-Image /ImageFile:"C:\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_amd64\mount
 
-6) Da esplora risorse entrare in:
+6) Da esplora risorse entrare in (Da notare che Program Files puo' chiamarsi anche semplicemente Programmi):
 
 	x86 -> C:\WinPE_x86\mount\Program Files\
 
