@@ -824,7 +824,7 @@ class OfflineInstall(object):
 
 		for i in devs:
 			if i.find("sr") != -1 or i.find("sd") != -1:
-				if len(i) == 3:
+				if (i.find("sr") != -1 and len(i) == 3) or (i.find("sd") != -1 and len(i) == 4):
 					print("  Found: /dev/" + i)
 
 					fs = ['iso9660', 'vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
