@@ -1,0 +1,110 @@
+Creazione della ISO Windows PE 5.0 per il CD Offline:
+=====================================================
+
+Procedura generale: http://rcs-dev.hackingteam.it/trac/wiki/Experimental%20Offline%20Installer
+
+1) Scaricare Windows 8.1:
+
+	Obtain Windows 8 and install it as a virtual machine into VirtualBox, from here for example: 
+
+		http://technet.microsoft.com/en-us/evalcenter/hh699156.aspx (and try to renew 90 days trial)
+
+		http://blog.laptopmag.com/how-to-add-another-90-days-to-your-windows-8-trial
+
+	(Enter slmgr -reaarm at the command prompt as Admin and hit Enter)
+
+2) Scaricare Windows PE 5.0:
+
+	Start from Windows Preinstallation Environment (Windows PE) Overview: 
+
+		http://technet.microsoft.com/en-us/library/hh825110.aspx 
+
+	In particular, WinPE: Create USB Bootable drive: 
+
+		http://technet.microsoft.com/en-us/library/hh825109.aspx
+
+	Istruzioni generali:
+
+		http://technet.microsoft.com/en-us/library/hh824972.aspx
+
+3) Aprire il software necessario:
+
+	Click Start, and type deployment. Right-click on:
+
+		ENGLISH: Deployment and Imaging Tools Environment
+
+		ITALIAN: Ambiente degli strumenti di distribuzione e creazione immagini
+
+	and then select Run as administrator
+
+4) Scegliere se si vuole lavorare a 32 (x86) o 64 (ia64) bit, quindi digitare:
+
+	x86 -> copype x86 C:\WinPE_x86_UFD
+
+	ia64 -> copype amd64 C:\WinPE_amd64_UFD
+
+5) Montare la Windows PE boot image:
+
+	x86 -> Dism /Mount-Image /ImageFile:"C:\WinPE_x86_UFD\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_x86_UFD\mount
+
+	ia64 -> Dism /Mount-Image /ImageFile:"C:\WinPE_amd64_UFD\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_amd64_UFD\mount
+
+6) Da esplora risorse entrare in (Da notare che Program Files puo' chiamarsi anche semplicemente Programmi):
+
+	x86 -> C:\WinPE_x86_UFD\mount\Program Files\
+
+	ia64 -> C:\WinPE_amd64_UFD\mount\Program Files\
+
+7) Creare la sottodirectory:
+
+	OfflineInstall\
+
+8) Copiare dentro l'eseguibile OfflineInstall.exe, che si trova sempre nel core offline in rcs-dev\share
+
+9) Sempre da esplora risorse entrare in:
+
+	x86 -> C:\WinPE_x86_UFD\mount\Windows\System32
+
+	ia64 -> C:\WinPE_amd64_UFD\mount\Windows\System32
+
+10) Creare dentro il file di nome:
+
+	winpeshl.ini
+
+	Il cui contenuto e':
+
+		[LaunchApp]
+		AppPath = "%SystemDrive%\Program Files\OfflineInstall\OfflineInstall.exe"
+
+	salvare il file e chiudere
+
+11) Cancellare il file per eliminare il messaggio "Press any key to boot from CD or DVD...":
+
+	C:\WinPE_x86_UFD\media\Boot\bootfix.bin
+
+12) Smontare la Windows PE boot image:
+
+	x86 -> Dism /Unmount-Image /MountDir:"C:\WinPE_x86_UFD\mount" /commit
+
+	ia64 -> Dism /Unmount-Image /MountDir:"C:\WinPE_amd64_UFD\mount" /commit
+
+		N.B: Se dovessi dare problemi l'umount, e' perche' mentre smontavo, l'esplora risorse
+		era ancora dentro la directory. Quindi uscire da esplora risorse ed usare lo stesso
+		comando, con l'opzione /discard invece di /commit
+
+13) Costruire la UFD finale:
+
+	Uscire da esplora risorse e:
+
+	x86 -> MakeWinPEMedia /UFD C:\WinPE_x86_UFD G:
+
+	ia64 -> MakeWinPEMedia /UFD C:\WinPE_amd64_UFD G:
+
+	dove G: e' la chiavetta USB da utilizzare.
+
+		N.B: Se si desidera testare la UFD del CD Offline per Windows, nel passo 13,
+		dopo aver creato la UFD finale, bisogna copiare la directory rcspe\ dentro:
+
+		x86 -> G:\
+
+		ia64 -> G:\
