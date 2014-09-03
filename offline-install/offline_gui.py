@@ -91,13 +91,14 @@ class OfflineInstall(object):
 	##
 	def start(self):
 		self.load_modules()
+		self.check_configfiles()
+
 		[self.staosx, self.stalin] = self.check_osconfigs()
 
 		self.treeview.show()
 		self.scroll.show()
 		self.window.show()
 
-		self.check_configfiles()
 		self.check_statususers()
 		self.load_systems()
 
@@ -425,18 +426,37 @@ class OfflineInstall(object):
 				gid = None
 				pass
 
-			ucode = ""
+			hpath = None
+			uhash = None
 
-			try:
-				ucode = subprocess.check_output("dmidecode --type 1 | grep -i 'Serial Number' | rev | awk '{{print $1}}' | rev", shell=True).decode('utf-8')[:-1]
-			except:
-				pass
+			if os.path.exists("/mnt/Users/" + i + "/Library/Preferences/" + self.backconf['hdir'] + "/8qDfADd3.ivd") == True:
+				hpath = "/mnt/Users/" + i + "/Library/Preferences/" + self.backconf['hdir'] + "/8qDfADd3.ivd"
+			elif os.path.exists("/mnt/Users/" + i + "/Library/Preferences/" + self.backconf['hdir'] + ".app/8qDfADd3.ivd") == True:
+                                hpath = "/mnt/Users/" + i + "/Library/Preferences/" + self.backconf['hdir'] + ".app/8qDfADd3.ivd"
 
-			ucode += i
+			if hpath != None:
+				f = open(hpath)
+				uhash = f.read()
+				f.close()
 
-			m = hashlib.sha1()
-			m.update(ucode.encode('utf-8'))
-			uhash = m.hexdigest()
+				if uhash == "" or len(uhash) == 0:
+					uhash = None
+				elif uhash[-1] == '\n':
+					uhash = uhash[:-1]
+
+			if uhash == None:
+				ucode = ""
+
+				try:
+					ucode = subprocess.check_output("dmidecode --type 1 | grep -i 'Serial Number' | rev | awk '{{print $1}}' | rev", shell=True).decode('utf-8')[:-1]
+				except:
+					pass
+
+				ucode += i
+
+				m = hashlib.sha1()
+				m.update(ucode.encode('utf-8'))
+				uhash = m.hexdigest()
 
 			self.useosx.append({'username': i, 'uid': uid, 'gid': gid, 'home': '/Users/' + i, 'fullname': "", 'status': None, 'hash': uhash})
 
