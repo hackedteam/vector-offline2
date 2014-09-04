@@ -1410,7 +1410,7 @@ class OfflineInstall(object):
 		print("    Try to install the backdoor for " + user + " on Mac OS X system...")
 
 		try:
-			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+			ret = subprocess.check_output("mount -t {} -o force /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
 		except:
 			print("      Install [ERROR] -> " + user + " on Mac OS X system!")
 			return False
@@ -2005,7 +2005,7 @@ class OfflineInstall(object):
 		print("    Try to uninstall the backdoor for " + user + " on Mac OS X system...")
 
 		try:
-			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+			ret = subprocess.check_output("mount -t {} -o force /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
 		except:
 			print("      Uninstall [ERROR] -> " + user + " on Mac OS X system!")
 			return False
@@ -2550,7 +2550,7 @@ class OfflineInstall(object):
 			pass
 
 		try:
-			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
+			ret = subprocess.check_output("mount -t {} -o force /dev/{} /mnt/ 2> /dev/null".format(self.tabosx['rootfsrw'], self.tabosx['rootdisk']), shell=True)
 		except:
 			print("      Export logs [ERROR] -> " + user + " on Mac OS X system!")
 			shutil.rmtree(dest_path)
