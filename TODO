@@ -1,4 +1,7 @@
 TODO Offline Install:
 =====================
-	- Creare versione USB del CD Offline
+	- Modificare yosemite da 11.0 a 10.10
+	- Per la / su Mac, cercare un altro file oltre /mach_kernel
+	- Aggiornare FUSE con supporto NTFS-3G
 	- Modificare offline-install.tar.gz nella ISO
+	- Creare versione USB del CD Offline
