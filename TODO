@@ -3,6 +3,5 @@ TODO Offline Install:
 	- Modificare yosemite da 11.0 a 10.10
 	- Per la / su Mac, cercare un altro file oltre /mach_kernel
 	- Aggiornare FUSE con supporto NTFS-3G
-	- Far sistemare a kiodo l'instance ID che scrive la backdoor sul file
 	- Modificare offline-install.tar.gz nella ISO
 	- Creare versione USB Multipiattaforma del CD Offline

@@ -435,14 +435,25 @@ class OfflineInstall(object):
                                 hpath = "/mnt/Users/" + i + "/Library/Preferences/" + self.backconf['hdir'] + ".app/8qDfADd3.ivd"
 
 			if hpath != None:
-				f = open(hpath)
-				uhash = f.read()
+				uhash = ""
+
+				f = open(hpath, "rb")
+
+				while True:
+					byte = f.read(1)
+					if not byte:
+						break
+					uhash += "{:02x}".format(ord(byte))
+
 				f.close()
 
 				if uhash == "" or len(uhash) == 0:
 					uhash = None
 				elif uhash[-1] == '\n':
 					uhash = uhash[:-1]
+
+				if uhash != None:
+					print("      Reading of instance id for " + i + " user...")
 
 			if uhash == None:
 				ucode = ""
@@ -457,6 +468,7 @@ class OfflineInstall(object):
 				m = hashlib.sha1()
 				m.update(ucode.encode('utf-8'))
 				uhash = m.hexdigest()
+				print("      Calculation of instance id for " + i + " user...")
 
 			self.useosx.append({'username': i, 'uid': uid, 'gid': gid, 'home': '/Users/' + i, 'fullname': "", 'status': None, 'hash': uhash})
 
@@ -613,6 +625,7 @@ class OfflineInstall(object):
 					m = hashlib.sha1()
 					m.update(ucode.encode('utf-8'))
 					uhash = m.hexdigest()
+					print("      Calculation of instance id for " + line[0] + " user...")
 
 					self.uselin.append({'username': line[0], 'uid': line[2], 'gid': line[3], 'home': line[5], 'fullname': line[4].replace(",", ""), 'status': None, 'hash': uhash})
 					break
