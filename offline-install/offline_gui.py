@@ -252,7 +252,7 @@ class OfflineInstall(object):
 				ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(i[2], i[1]), shell=True)
 
 				if i[0] == 'os x':
-					if os.path.exists('/mnt/mach_kernel') == True:
+					if os.path.exists('/mnt/mach_kernel') == True or os.path.exists('/mnt/System/Library/Kernels/kernel') == True:
 						mountpoint = '/'
 
 						print("  Found: " + i[0] + " -> /dev/" + i[1] + " -> " + i[2] + " -> " + mountpoint)
@@ -525,7 +525,7 @@ class OfflineInstall(object):
 			oscode = "Mountain Lion"
 		elif osversion.find("10.9") != -1:
 			oscode = "Mavericks"
-		elif osversion.find("11.0") != -1:
+		elif osversion.find("10.10") != -1:
 			oscode = "Yosemite"
 
 		self.tabosx.update({'oscode': oscode})
