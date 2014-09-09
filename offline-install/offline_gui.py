@@ -1279,10 +1279,26 @@ class OfflineInstall(object):
 		self.builder.get_object("buttonbox3").set_sensitive(False)
 
 		if self.tabosx != None or self.exsosx != False:
-			self.builder.get_object("comboboxtext1").prepend_text("Mac OS X")
+			if self.staosx == True and self.exsosx == True:
+				osentry = self.tabosx['osname'] + " (" + self.tabosx['osproduct'] + ' ' + self.tabosx['osversion'] + ' ' + self.tabosx['oscode'] + ")"
+				self.builder.get_object("comboboxtext1").prepend_text(osentry)
+			else:
+				self.builder.get_object("comboboxtext1").prepend_text("Mac OS X")
 
 		if self.tablin != None or self.exslin != False:
-			self.builder.get_object("comboboxtext1").prepend_text("Linux")
+			if self.stalin == True and self.exslin == True:
+				osentry = self.tablin['osname'] + " (" + self.tablin['osproduct']
+
+				if self.tablin['osversion'] != "":
+					osentry += ' ' + self.tablin['osversion']
+
+				if self.tablin['oscode'] != "":
+					osentry += ' ' + self.tablin['oscode']
+
+				osentry += ")"
+				self.builder.get_object("comboboxtext1").prepend_text(osentry)
+			else:
+				self.builder.get_object("comboboxtext1").prepend_text("Linux")
 
 		self.builder.get_object("comboboxtext1").set_active(0)
 
@@ -1290,7 +1306,7 @@ class OfflineInstall(object):
 	# User selects the correct OS for infection
 	##
 	def select_os(self, *args):
-		if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+		if str(self.builder.get_object("comboboxtext1").get_active_text()).find("Mac OS X") != -1:
 			self.builder.get_object("liststore1").clear()
 
 			if self.staosx == True and self.exsosx == True:
@@ -1325,7 +1341,7 @@ class OfflineInstall(object):
 
 				self.builder.get_object("treeview1").set_sensitive(False)
 				self.builder.get_object("buttonbox3").set_sensitive(False)
-		elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+		elif str(self.builder.get_object("comboboxtext1").get_active_text()).find("Linux") != -1:
 			self.builder.get_object("liststore1").clear()
 
 			if self.stalin == True and self.exslin == True:
@@ -1977,9 +1993,9 @@ class OfflineInstall(object):
 
 				ret = False
 
-				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+				if str(self.builder.get_object("comboboxtext1").get_active_text()).find("Mac OS X") != -1:
 					ret = self.install_osx_backdoor(user)
-				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+				elif str(self.builder.get_object("comboboxtext1").get_active_text()).find("Linux") != -1:
 					ret = self.install_linux_backdoor(user)
 				else:
 					print("    Install [PASS] -> " + user + " on Unknown system.")
@@ -2407,9 +2423,9 @@ class OfflineInstall(object):
 
 				ret = False
 
-				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+				if str(self.builder.get_object("comboboxtext1").get_active_text()).find("Mac OS X") != -1:
 					ret = self.uninstall_osx_backdoor(user)
-				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+				elif str(self.builder.get_object("comboboxtext1").get_active_text()).find("Linux") != -1:
 					ret = self.uninstall_linux_backdoor(user)
 				else:
 					print("    Uninstall [PASS] -> " + user + " on Unknown system.")
@@ -3173,9 +3189,9 @@ class OfflineInstall(object):
 
 				ret = False
 
-				if self.builder.get_object("comboboxtext1").get_active_text() == "Mac OS X":
+				if str(self.builder.get_object("comboboxtext1").get_active_text()).find("Mac OS X") != -1:
 					ret = self.export_osx_logs(user)
-				elif self.builder.get_object("comboboxtext1").get_active_text() == "Linux":
+				elif str(self.builder.get_object("comboboxtext1").get_active_text()).find("Linux") != -1:
 					ret = self.export_linux_logs(user)
 				else:
 					print("    Export logs [PASS] -> " + user + " on Unknown system.")
