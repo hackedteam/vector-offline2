@@ -860,7 +860,7 @@ class OfflineInstall(object):
 				if (i.find("sr") != -1 and len(i) == 3) or (i.find("sd") != -1 and len(i) == 4):
 					print("  Found: /dev/" + i)
 
-					fs = ['iso9660', 'vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+					fs = ['iso9660', 'vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
 					devfs = None
 
 					for j in fs:
@@ -2971,7 +2971,7 @@ class OfflineInstall(object):
 	##
 	def mount_devs(self):
 		parts = self.check_partitions(False)
-		fs = ['vfat', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+		fs = ['vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
 
 		print("Check drives on partitions to mount...")
 		
@@ -3019,7 +3019,7 @@ class OfflineInstall(object):
 
 			for j in fs:
 				try:
-					subprocess.call("mount -t {} /dev/{} {} 2> /dev/null".format(j, i, mnt), shell=True)
+					subprocess.check_output("mount -t {} /dev/{} {} 2> /dev/null".format(j, i, mnt), shell=True)
 					print("  Found: /dev/" + i + " on mount point " + mnt)
 					self.destdevs.append([i, mnt])
 					break
@@ -3059,7 +3059,7 @@ class OfflineInstall(object):
 				continue
 
 			try:
-				subprocess.call("umount {} 2> /dev/null".format(i[1]), shell=True)
+				subprocess.check_output("umount {} 2> /dev/null".format(i[1]), shell=True)
 				print("  Found: /dev/" + i[0] + " on mount point " + i[1])			
 				shutil.rmtree(i[1])
 			except:

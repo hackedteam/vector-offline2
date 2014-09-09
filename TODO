@@ -1,6 +1,5 @@
 TODO Offline Install:
 =====================
-	- Aggiornare FUSE con supporto NTFS-3G
 	- Testare dual boot mac os x e linux
 	- Testare mac os x con disco cifrato
 	- Modificare offline-install.tar.gz nella ISO
