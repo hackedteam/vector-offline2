@@ -719,10 +719,11 @@ class OfflineInstall(object):
 			pass
 
 		if osname == None:
-			osname = subprocess.check_output("cat /mnt/etc/sysconfig/network | grep HOSTNAME | sed -e 's/.*=//g'", shell=True)[:-1].decode('utf-8')
-		except:
-			osname = ""
-			pass
+			try:
+				osname = subprocess.check_output("cat /mnt/etc/sysconfig/network | grep HOSTNAME | sed -e 's/.*=//g'", shell=True)[:-1].decode('utf-8')
+			except:
+				osname = ""
+				pass
 
 		try:
 			if int(subprocess.check_output("file /mnt/bin/uname | grep '32-bit' | wc -l", shell=True)[:-1]) == 0:
