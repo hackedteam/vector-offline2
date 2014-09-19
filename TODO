@@ -1,3 +1,4 @@
 TODO Offline Install:
 =====================
+	- Quando fa l'export logs, deve calcolare lo spazio libero del drive non della directory
 	- Creare versione USB Multipiattaforma del CD Offline
