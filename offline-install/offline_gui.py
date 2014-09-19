@@ -2590,9 +2590,20 @@ class OfflineInstall(object):
 		##
 		drive_space = 0
 		evidence_space = 0
+		nmdrive = ""
+		nmlen = 0
+
+		for i in range(0, len(self.destdir)):
+			if self.destdir[i] == '/':
+				nmlen += 1
+
+				if nmlen > 2:
+					break
+
+			nmdrive += self.destdir[i]
 
 		try:
-			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(self.destdir), shell=True).decode('utf-8')[:-1])
+			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(nmdrive), shell=True).decode('utf-8')[:-1])
 		except:
 			pass
 
@@ -2837,9 +2848,20 @@ class OfflineInstall(object):
 		##
 		drive_space = 0
 		evidence_space = 0
+		nmdrive = ""
+		nmlen = 0
+
+		for i in range(0, len(self.destdir)):
+			if self.destdir[i] == '/':
+				nmlen += 1
+
+				if nmlen > 2:
+					break
+
+			nmdrive += self.destdir[i]
 
 		try:
-			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(self.destdir), shell=True).decode('utf-8')[:-1])
+			drive_space = int(subprocess.check_output("df -k | grep -i '{}' | awk '{{print $4}}'".format(nmdrive), shell=True).decode('utf-8')[:-1])
 		except:
 			pass
 
