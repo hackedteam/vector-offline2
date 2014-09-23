@@ -78,13 +78,19 @@ Procedura generale: http://rcs-dev.hackingteam.it/trac/wiki/Experimental%20Offli
 
 	salvare il file e chiudere
 
-11) Cancellare il file per eliminare il messaggio "Press any key to boot from CD or DVD...":
+11) Creare la directory (altrimenti le dialog non vanno):
+
+	x86 -> C:\WinPE_x86\mount\Windows\System32\config\systemprofile\Desktop
+
+	ia64 -> C:\WinPE_amd64\mount\Windows\System32\config\systemprofile\Desktop
+
+12) Cancellare il file per eliminare il messaggio "Press any key to boot from CD or DVD...":
 
 	x86 -> C:\WinPE_x86\media\Boot\bootfix.bin
 
 	ia64 -> C:\WinPE_amd64\media\Boot\bootfix.bin
 
-12) Smontare la Windows PE boot image:
+13) Smontare la Windows PE boot image:
 
 	x86 -> Dism /Unmount-Image /MountDir:"C:\WinPE_x86\mount" /commit
 
@@ -94,7 +100,7 @@ Procedura generale: http://rcs-dev.hackingteam.it/trac/wiki/Experimental%20Offli
 		era ancora dentro la directory. Quindi uscire da esplora risorse ed usare lo stesso
 		comando, con l'opzione /discard invece di /commit
 
-13) Costruire la ISO finale:
+14) Costruire la ISO finale:
 
 	Uscire da esplora risorse e:
 
