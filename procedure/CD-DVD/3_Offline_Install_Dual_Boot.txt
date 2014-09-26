@@ -138,6 +138,6 @@
 
 		$ cd ../../../DualBootISO/
 		$ rm offlineinstall.iso
-		$ mkisofs -R -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso Content
+		$ mkisofs -R -J -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso Content
 
 	La ISO finale del dual boot sara' offlineinstall.iso

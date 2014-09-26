@@ -30,7 +30,7 @@ N.B: Se e' gia' presente RCSPE va sostituito con quello nuovo.
 5) Aprire cmd.exe e generare la ISO del CD Offline tramite il comando:
 
 cd C:\Users\Andrea\Desktop\Offline_Installer\
-bin\mkisofs.exe -R -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso CD\
+bin\mkisofs.exe -R -J -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso CD\
 
 N.B: Se e' gia' presente la ISO del CD Offline, va sostituito il file c:\Users\Andrea\Desktop\Offline_Installer\offlineinstall.iso.
 
