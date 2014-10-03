@@ -494,6 +494,14 @@ exit
 
 	NOME ISO: offlineinstalllin.iso
 
+	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI:
+
+		- Formattare una chiavetta USB come fat32 e renderla bootabile
+		- Creare il percorso di directory dentro la chiavetta USB: /efi/boot/
+		- Copiare il boot loader dentro il nuovo percorso di directory: /efi/boot/bootX64.efi
+		- Copiare la ISO di linux offlineinstalllin.iso con il nome boot.iso dentro il nuovo percorso di directory: /efi/boot/boot.iso
+		- Copiare RCSPE nella root directory della chiavetta USB: /
+
 4) Modificare la ISO gia' creata:
 
 	$ cd work
@@ -600,3 +608,11 @@ exit
         $ cd ../
 
 	NOME ISO: offlineinstalllin.iso
+
+	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI:
+
+		- Formattare una chiavetta USB come fat32 e renderla bootabile
+		- Creare il percorso di directory dentro la chiavetta USB: /efi/boot/
+		- Copiare il boot loader dentro il nuovo percorso di directory: /efi/boot/bootX64.efi
+		- Copiare la ISO di linux offlineinstalllin.iso con il nome boot.iso dentro il nuovo percorso di directory: /efi/boot/boot.iso
+		- Copiare RCSPE nella root directory della chiavetta USB: /
