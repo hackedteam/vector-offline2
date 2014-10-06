@@ -559,7 +559,7 @@ class OfflineInstall(object):
 		self.tabosx.update({'osname': osname})
 		self.tabosx.update({'osarch': osarch})
 
-		if osversion.find("10.5") != -1 or osversion.find("10.6") != -1 or osversion.find("10.7") != -1 or osversion.find("10.8") != -1 or osversion.find("10.9") != -1 or osversion.find("10.0") != -1:
+		if osversion.find("10.5") != -1 or osversion.find("10.6") != -1 or osversion.find("10.7") != -1 or osversion.find("10.8") != -1 or osversion.find("10.9") != -1 or osversion.find("10.10") != -1:
 			ossupport = True
 
 		self.tabosx.update({'ossupport': ossupport})
