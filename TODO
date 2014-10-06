@@ -1,5 +1,6 @@
 TODO Offline Install:
 =====================
+	- Scrivere guida procedure/USB/3_Offline_Install_Dual_Boot.txt
 	- Modificare offline-install.tar.gz nella ISO di Linux
-	- Ricompilare OfflineInstall.exe a 64 bit tramite Visual Studio
-	- Creare versione USB del CD Offline per sistemi U(EFI) e BIOS
+	- Creare versione CD dell'Offline Installer per sistemi U(EIF) e BIOS
+	- Creare versione USB dell'Offline Installer per sistemi U(EFI) e BIOS
