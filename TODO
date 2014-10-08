@@ -1,6 +1,4 @@
 TODO Offline Install:
 =====================
 	- Scrivere guida procedure/USB/3_Offline_Install_Dual_Boot.txt
-	- Modificare offline-install.tar.gz nella ISO di Linux
-	- Creare versione CD dell'Offline Installer per sistemi U(EIF) e BIOS
-	- Creare versione USB dell'Offline Installer per sistemi U(EFI) e BIOS
+	- Creare procedura CD e USB per BIOS e U(EFI) lato RCS server
