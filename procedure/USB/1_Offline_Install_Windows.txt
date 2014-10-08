@@ -80,15 +80,15 @@ Procedura generale: http://rcs-dev.hackingteam.it/trac/wiki/Experimental%20Offli
 
 11) Creare la directory (altrimenti le dialog non vanno):
 
-        x86 -> C:\WinPE_x86\mount\Windows\System32\config\systemprofile\Desktop
+        x86 -> C:\WinPE_x86_UFD\mount\Windows\System32\config\systemprofile\Desktop
 
-        ia64 -> C:\WinPE_amd64\mount\Windows\System32\config\systemprofile\Desktop
+        ia64 -> C:\WinPE_amd64_UFD\mount\Windows\System32\config\systemprofile\Desktop
 
 12) Cancellare il file per eliminare il messaggio "Press any key to boot from CD or DVD...":
 
 	x86 -> C:\WinPE_x86_UFD\media\Boot\bootfix.bin
 
-	ia64 -> C:\WinPE_amd64\media\Boot\bootfix.bin
+	ia64 -> C:\WinPE_amd64_UFD\media\Boot\bootfix.bin
 
 13) Smontare la Windows PE boot image:
 
