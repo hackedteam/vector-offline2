@@ -1,0 +1,118 @@
+1) Procedura da Windows:
+
+	1) Preparazione della chiavetta USB, quindi aprire cmd.exe come amministratore
+
+	2) Eseguire: diskpart.exe
+
+	3) Individuare il numero disco relativo alla chiavetta USB tramite il comando di diskpart:
+
+		list disk
+
+	4) Ad esempio da me la chiavetta USB e' il disco 1. Quindi eseguire i comandi di diskpart:
+
+		select disk 1
+		clean
+		create partition primary
+		select partition 1
+		active
+		format fs=fat32 quick label="Offline"
+		assign
+		exit
+
+	Adesso la chiavetta USB e' predisposta per bootare all'avvio.
+
+2) Procedura da Linux:
+
+	1) Generare Windows PE completo di tutte le configurazioni e file dell'Offline Install:
+
+		x86 -> C:\WinPE_x86_UFD\
+		ia64 -> C:\WinPE_amd64_UFD\
+
+	2) Copiare tutto il contenuto ovvero file e directory della directory media\ dentro la chiavetta USB:
+
+		x86 -> C:\WinPE_x86_UFD\media\* -> /path/USB_KEY/
+		ia64 -> C:\WinPE_amd64_UFD\media\* -> /path/USB_KEY/
+
+	3) Entrare dentro il file system della chiavetta USB e rinonimare il seguente file:
+
+		$ mv /path/USB_KEY/EFI/Boot/bootx64.efi /path/USB_KEY/EFI/Boot/8bootX64.efi
+
+	4) Scompattare il file ISO-2-USB EFI-BooterForMac0.01beta.zip e copiare dentro la chiavetta USB solo il file bootx64.efi:
+
+		$ tar -xvzf ISO-2-USB EFI-BooterForMac0.01beta.zip
+		$ mv /path/bootx64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
+
+	5) Copiare la ISO Linux dell'Offline Install dentro la chiavetta USB con il nome boot.iso:
+
+		$ cp /path/offlineinstalllin.iso /path/USB_KEY/EFI/Boot/boot.iso
+
+	6) Dentro la chiavetta USB, rinominare il file:
+
+		$ mv /path/USB_KEY/EFI/Boot/bootx64.efi /path/USB_KEY/EFI/Boot/bootlinux.efi
+
+	7) Adesso copiamo i file di refind (ovviamente i nostri customizzati) per far bootare la chiavetta USB su sistemi U(EFI):
+
+		$ cp -Rf /path/icons/ /path/refind_x64.efi /path/refind.conf /path/USB_KEY/EFI/Boot/
+
+	8) Dentro la chiavetta USB, rinominare il file:
+
+		$ mv /path/USB_KEY/EFI/Boot/refind_x64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
+
+	Adesso abbiamo una chiavetta USB che boota refind su sistemi U(EFI) in modo tale da far partire l'Offline Install o come Windows PE o come Linux tramite refind.
+
+	Occupiamoci di far partire la chiavetta USB anche su sistemi BIOS o legacy tramtie Grub4dos.
+
+	9) Copiamo i file di grub4dos (ovviamente i nostri customizzati) nella root directory della USB per far bootare la chiavetta USB su sistemi BIOS o legacy:
+
+		$ cp -Rf /path/bkg.xpm.gz /path/grldr /path/menu.lst /path/menuset /path/USB_KEY/
+
+	10) Creiamo la directory images dentro la root directory della chiavetta USB:
+
+		$ mkdir /path/USB_KEY/images/
+
+	11) Copiare le due iso Windows PE e Linux dell'Offline Install dentro la directory images della chiavetta USB rispettando i nomi:
+
+		$ cp /path/offlineinstalllin.iso /path/USB_KEY/images/
+		$ cp /path/offlineinstallwin.iso /path/USB_KEY/images/
+
+	Adesso bisogna impostare correttamente il boot sector per far bootare correttamente la chiavetta USB su sistemi BIOS o legacy
+
+3) Procedura da Windows:
+
+	1) Individuiamo prima il numero del disco (ovvero della chiavetta USB), quindi aprire cmd.exe come amministratore:
+
+	2) Eseguire: diskpart.exe
+
+        3) Individuare il numero disco relativo alla chiavetta USB tramite il comando di diskpart:
+
+                list disk
+
+        4) Ad esempio da me la chiavetta USB e' il disco 1. A questo punto bisogna installare grub4dos nel boot sector della chiavetta e ci serviamo di grubinst composto da due eseguibili:
+
+		- grubinst.exe -> da eseguire come amministratore su cmd.exe
+
+			4.1) Aprire cmd.exe come amministratore
+
+			4.2) Eseguire il comando:
+
+				\path\grubinst (hdX,0)
+
+			dove X e' il numero del disco relativo alla chiavetta USB che nel nostro caso e' il disco 1
+
+		- grubinst_gui.exe -> da eseguire come amministrare con un doppio click
+
+			4.1) Aprire grubinst_gui.exe come amministratore
+
+			4.2) Scegliere come disk (hdX), dove X  e' il numero del disco relativo alla chiavetta USB che nel nostro caso e' il disco 1
+
+			4.3) Infine cliccare sul bottone "Install"
+
+	Adesso abbiamo una chiavetta USB che boota grub4dos su sistemi BIOS o legacy in modo tale da far partire l'Offline Install o come Windows PE o come Linux tramite grub4dos.
+
+4) Procedura da Linux:
+
+	1) 4) Se si desidera usare l'infezione, copiare RCSPE nella root directory della chiavetta USB:
+
+                $ cp -Rf RCSPE /path/USB_KEY/
+
+	Completate tutte le procedure, la chiavetta e' pronta e bootara' su sistemi BIOS o legacy tramite grub4dos e su sistemi U(EFI) tramite Refind.
