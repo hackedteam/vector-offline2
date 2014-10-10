@@ -523,6 +523,7 @@ exit
 
 		6) Scompattare il file ISO-2-USB EFI-BooterForMac0.01beta.zip e copiare dentro la chiavetta USB solo il file bootx64.efi:
 
+			$ tar -xvzf ISO-2-USB EFI-BooterForMac0.01beta.zip
 			$ cp /path/bootx64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
 
 		7) Copiare la ISO Linux dell'Offline Install dentro la chiavetta USB con il nome boot.iso:
@@ -669,6 +670,7 @@ exit
 
                 6) Scompattare il file ISO-2-USB EFI-BooterForMac0.01beta.zip e copiare dentro la chiavetta USB solo il file bootx64.efi:
 
+			$ tar -xvzf ISO-2-USB EFI-BooterForMac0.01beta.zip
                         $ cp /path/bootx64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
 
                 7) Copiare la ISO Linux dell'Offline Install dentro la chiavetta USB con il nome boot.iso:
