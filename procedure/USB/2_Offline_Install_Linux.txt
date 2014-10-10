@@ -494,13 +494,44 @@ exit
 
 	NOME ISO: offlineinstalllin.iso
 
-	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI:
+	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI BISOGNA FARE DA WINDOWS:
 
-		- Formattare una chiavetta USB come fat32 e renderla bootabile
-		- Creare il percorso di directory dentro la chiavetta USB: /efi/boot/
-		- Copiare il boot loader dentro il nuovo percorso di directory: /efi/boot/bootX64.efi
-		- Copiare la ISO di linux offlineinstalllin.iso con il nome boot.iso dentro il nuovo percorso di directory: /efi/boot/boot.iso
-		- Copiare RCSPE nella root directory della chiavetta USB: /
+		1) Preparazione della chiavetta USB, quindi aprire cmd.exe come amministratore
+
+	        2) Eseguire: diskpart.exe
+
+	        3) Individuare il numero disco relativo alla chiavetta USB tramite il comando di diskpart:
+
+	                list disk
+
+	        4) Ad esempio da me la chiavetta USB e' il disco 1. Quindi eseguire i comandi di diskpart:
+
+	                select disk 1
+	                clean
+	                create partition primary
+	                select partition 1
+	                active
+	       	        format fs=fat32 quick label="Offline"
+	                assign
+	                exit
+
+	        Adesso la chiavetta USB e' predisposta per bootare all'avvio.
+
+		5) Ritornado su linux, dentro la chiavetta USB creare la directory:
+
+			$ mkdir /path/USB_KEY/EFI/Boot/
+
+		6) Scompattare il file ISO-2-USB EFI-BooterForMac0.01beta.zip e copiare dentro la chiavetta USB solo il file bootx64.efi:
+
+			$ cp /path/bootx64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
+
+		7) Copiare la ISO Linux dell'Offline Install dentro la chiavetta USB con il nome boot.iso:
+
+	                $ cp /path/offlineinstalllin.iso /path/USB_KEY/EFI/Boot/boot.iso
+
+		8) Se si desidera usare l'infezione, copiare RCSPE nella root directory della chiavetta USB:
+
+	                $ cp -Rf RCSPE /path/USB_KEY/
 
 4) Modificare la ISO gia' creata:
 
@@ -609,10 +640,41 @@ exit
 
 	NOME ISO: offlineinstalllin.iso
 
-	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI:
+	A QUESTO PUNTO SE SI VUOLE PROVARE QUESTA ISO SU USB SU SISTEMI (U)EFI BISOGNA FARE DA WINDOWS:
 
-		- Formattare una chiavetta USB come fat32 e renderla bootabile
-		- Creare il percorso di directory dentro la chiavetta USB: /efi/boot/
-		- Copiare il boot loader dentro il nuovo percorso di directory: /efi/boot/bootX64.efi
-		- Copiare la ISO di linux offlineinstalllin.iso con il nome boot.iso dentro il nuovo percorso di directory: /efi/boot/boot.iso
-		- Copiare RCSPE nella root directory della chiavetta USB: /
+                1) Preparazione della chiavetta USB, quindi aprire cmd.exe come amministratore
+
+                2) Eseguire: diskpart.exe
+
+                3) Individuare il numero disco relativo alla chiavetta USB tramite il comando di diskpart:
+
+                        list disk
+
+                4) Ad esempio da me la chiavetta USB e' il disco 1. Quindi eseguire i comandi di diskpart:
+
+                        select disk 1
+                        clean
+                        create partition primary
+                        select partition 1
+                        active
+                        format fs=fat32 quick label="Offline"
+                        assign
+                        exit
+
+                Adesso la chiavetta USB e' predisposta per bootare all'avvio.
+
+                5) Ritornado su linux, dentro la chiavetta USB creare la directory:
+
+                        $ mkdir /path/USB_KEY/EFI/Boot/
+
+                6) Scompattare il file ISO-2-USB EFI-BooterForMac0.01beta.zip e copiare dentro la chiavetta USB solo il file bootx64.efi:
+
+                        $ cp /path/bootx64.efi /path/USB_KEY/EFI/Boot/bootx64.efi
+
+                7) Copiare la ISO Linux dell'Offline Install dentro la chiavetta USB con il nome boot.iso:
+
+                        $ cp /path/offlineinstalllin.iso /path/USB_KEY/EFI/Boot/boot.iso
+
+                8) Se si desidera usare l'infezione, copiare RCSPE nella root directory della chiavetta USB:
+
+                        $ cp -Rf RCSPE /path/USB_KEY/

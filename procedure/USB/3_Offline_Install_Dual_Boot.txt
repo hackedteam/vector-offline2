@@ -111,7 +111,7 @@
 
 4) Procedura da Linux:
 
-	1) 4) Se si desidera usare l'infezione, copiare RCSPE nella root directory della chiavetta USB:
+	1) Se si desidera usare l'infezione, copiare RCSPE nella root directory della chiavetta USB:
 
                 $ cp -Rf RCSPE /path/USB_KEY/
 
