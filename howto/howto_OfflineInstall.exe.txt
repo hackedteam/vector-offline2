@@ -1,14 +1,28 @@
-Come reperire l'ultimo OfflineInstall.exe per l'Offline Installer CD per Windows:
-=================================================================================
+Come compilare l'OfflineInstall.exe a 64 bit su Windows con Visual C++:
+=======================================================================
 
-1) Copiare rcs-dev/share/RELEASE/SVILUPPO/cores.../offline.zip
+Riferimento: http://msdn.microsoft.com/en-us/library/9yb4317s.aspx
 
-2) Unzippare offline.zip
+1) Aprire con Visual C++ il file vector-offline/OfflineInstall.sln
 
-3) Dentro offline/winpe/sources/ c'e' il file boot.wim
+2) Cliccare su "Build -> Configuration Manager"
 
-4) Copiare boot.wim su piattaforma Windows
+3) Cliccare su "Active Solution Configuration -> Debug"
 
-5) Su Windows, installare il programma image X per poter aprire il file immagine boot.wim
+4) Cliccare su "Active Solution Platform -> New" aprendo la finestra New Solution Platform
 
-6) Su Windows, aprire boot.wim, dentro si trova il file OfflineInstall.exe 
+5) Cliccare su "Type or select the new platform" e selezionare "x64"
+
+6) Su "Copy settings from" lasciare "Win32" (cosi mantiene tutte le configurazioni della versione a 32 bit)
+
+7) Cliccare su "OK" ed adesso il progetto sara' predisposto per architettura a 64 bit
+
+8) Controllare su "Active Solution Configuration -> Release" se anche questa configurazione e' adesso predisposta per architettura a 64 bit
+
+9) Se non lo e', ripetere la stessa procedura fatta per "Debug" anche per "Release"
+
+10) Cliccare su "Close" su "Configuration Manager"
+
+11) Per compilare cliccare su "Build -> Build OfflineInstall"
+
+12) Se non ci sono errori, l'eseguibile OfflineInstall.exe a 64 bit si trovera' su vector-offline\Release\OfflineInstall.exe
