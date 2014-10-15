@@ -9,7 +9,7 @@ Riferimento: http://msdn.microsoft.com/en-us/library/9yb4317s.aspx
 
 3) Cliccare su "Active Solution Configuration -> Debug"
 
-4) Cliccare su "Active Solution Platform -> New" aprendo la finestra New Solution Platform
+4) Cliccare su "Active Solution Platform -> New" aprendo la finestra "New Solution Platform"
 
 5) Cliccare su "Type or select the new platform" e selezionare "x64"
 
@@ -23,6 +23,14 @@ Riferimento: http://msdn.microsoft.com/en-us/library/9yb4317s.aspx
 
 10) Cliccare su "Close" su "Configuration Manager"
 
-11) Per compilare cliccare su "Build -> Build OfflineInstall"
+11) Verificare sulla barra in alto se "Release" e' impostato a "x64"
 
-12) Se non ci sono errori, l'eseguibile OfflineInstall.exe a 64 bit si trovera' su vector-offline\Release\OfflineInstall.exe
+12) Cliccare a sinistra su "OfflineInstall"
+
+13) Per compilare cliccare su "Build -> Build OfflineInstall"
+
+14) Se non ci sono errori ovvero si ottiene "Build: 1 succeeded", chiudere Visual C++
+
+15) L'eseguibile OfflineInstall.exe a 64 bit si trovera' su vector-offline\Release\OfflineInstall.exe
+
+16) Usare il nuovo OfflineInstall.exe per Windows PE a 64 bit
