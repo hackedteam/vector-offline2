@@ -1,6 +1,5 @@
 TODO Offline Install:
 =====================
-	- Ricompilare vector-offline di Windows a 64 bit scaricandolo dal repository corretto
 	- Sostituire OfflineInstall.exe corretto in tutta la parte relativa a Windows
 	- Sostituire ISO e USB con il nuovo Windows che integra il nuovo OfflineInstall.exe
 	- Creare procedura CD e USB per BIOS e U(EFI) lato RCS server
