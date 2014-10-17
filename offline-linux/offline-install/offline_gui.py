@@ -90,14 +90,14 @@ class OfflineInstall(object):
 	# Start all modules
 	##
 	def start(self):
+		self.treeview.show()
+		self.scroll.show()
+		self.window.show()
+
 		self.load_modules()
 		self.check_configfiles()
 
 		[self.staosx, self.stalin] = self.check_osconfigs()
-
-		self.treeview.show()
-		self.scroll.show()
-		self.window.show()
 
 		self.check_statususers()
 		self.load_systems()
