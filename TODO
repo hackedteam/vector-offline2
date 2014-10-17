@@ -1,6 +1,4 @@
 TODO Offline Install:
 =====================
-	- Sostituire OfflineInstall.exe corretto in tutta la parte relativa a Windows
-	- Sostituire ISO e USB con il nuovo Windows che integra il nuovo OfflineInstall.exe
 	- Creare procedura CD e USB per BIOS e U(EFI) lato RCS server
 	- Preparare lo script per sistemi Windows e *nix per preparare la chiavetta automaticamente
