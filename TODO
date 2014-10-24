@@ -1,5 +1,6 @@
 TODO Offline Install:
 =====================
+	- Testare il CD Offline su Macbook Air con OS X 10.10 Yosemite
 	- Il popup "OS not found" su chiavetta USB (no CD/DVD) si nasconde dietro la finestra principale
 	- Creare procedura CD e USB per BIOS e U(EFI) lato RCS server
 	- Preparare lo script per sistemi Windows e *nix per preparare la chiavetta automaticamente
