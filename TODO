@@ -1,5 +1,7 @@
 TODO Offline Install:
 =====================
+	- Far andare il CD Offline su OpenSUSE che usa Btrfs per la root e Xfs per la home
+	- Testare il CD Offline su sistemi LVM come ubuntu, mageia, opensuse
 	- Testare il CD Offline su Macbook Air con OS X 10.10 Yosemite
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D

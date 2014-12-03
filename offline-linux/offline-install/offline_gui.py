@@ -137,11 +137,18 @@ class OfflineInstall(object):
 
 		print("Searching hd devices...")
 
+		subprocess.call("vgscan", shell=True)
+		subprocess.call("vgchange -ay", shell=True)
+
 		for i in devs:
 			if i.find("sd") != -1:
 				if len(i) == 3:
 					print("  Found: /dev/" + i)
 					hds.append(i)
+
+		if os.path.exists("/dev/mapper/") == True:
+			print("  Found: /dev/mapper")
+			hds.append("mapper")
 
 		if hds == []:
 			print("  Not found: Hd devices")
@@ -162,23 +169,40 @@ class OfflineInstall(object):
 		for i in hds:
 			print("Searching partitions on /dev/" + i + " device...")
 
-			for j in devs:
-				if j.find(i) != -1:
-					if len(j) > 3:
-						try:
-							ret = subprocess.call("cryptsetup isLuks /dev/{}".format(j), shell=True)
-							if int(ret) == 0:
-								if svalue == True:
-									self.crylin = True
+			if i == "mapper":
+				for j in os.listdir("/dev/mapper/"):
+					try:
+						ret = subprocess.call("cryptsetup isLuks /dev/mapper/{}".format(j), shell=True)
+						if int(ret) == 0:
+							if svalue == True:
+								self.crylin = True
 
-								print("  Found: /dev/" + j + ' (Disk is encrypted)')
-							else:
-								print("  Found: /dev/" + j) 
-						except:
-							print("  Found: /dev/" + j)
-							pass
+							print("  Found: /dev/mapper/" + j + ' (Disk is encrypted)')
+						else:
+							print("  Found: /dev/mapper/" + j)
+					except:
+						print("  Found: /dev/mapper/" + j)
+						pass
 
-						parts.append(j)
+					parts.append("mapper/" + j)
+			else:
+				for j in devs:
+					if j.find(i) != -1:
+						if len(j) > 3:
+							try:
+								ret = subprocess.call("cryptsetup isLuks /dev/{}".format(j), shell=True)
+								if int(ret) == 0:
+									if svalue == True:
+										self.crylin = True
+
+									print("  Found: /dev/" + j + ' (Disk is encrypted)')
+								else:
+									print("  Found: /dev/" + j) 
+							except:
+								print("  Found: /dev/" + j)
+								pass
+
+							parts.append(j)
 
 		if parts == []:
 			print("  Not found: Hd partitions")
@@ -191,7 +215,7 @@ class OfflineInstall(object):
 	##
 	def check_filesystems(self):
 		parts = self.check_partitions(True)
-		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
 		tablefs = []
 	
 		if parts == None:
@@ -274,6 +298,8 @@ class OfflineInstall(object):
 								if len(mountpoint) == 0:
 									uuid_sup = "UUID MALFORMED"
 									mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+									if len(mountpoint) == 0:
+										mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
 							else:
 								uuid_sup = "NO UUID"
 								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
@@ -867,7 +893,7 @@ class OfflineInstall(object):
 				if (i.find("sr") != -1 and len(i) == 3) or (i.find("sd") != -1 and len(i) == 4):
 					print("  Found: /dev/" + i)
 
-					fs = ['iso9660', 'vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+					fs = ['iso9660', 'vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
 					devfs = None
 
 					for j in fs:
@@ -3016,7 +3042,7 @@ class OfflineInstall(object):
 	##
 	def mount_devs(self):
 		parts = self.check_partitions(False)
-		fs = ['vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs']
+		fs = ['vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
 
 		print("Check drives on partitions to mount...")
 		
