@@ -1,5 +1,7 @@
 TODO Offline Install:
 =====================
+	- Testare su imac e macbook air
+	- Testare il file system btrfs
 	- Testare il CD Offline su sistemi LVM come ubuntu, mageia, opensuse
 	- Xfs con il kernel 3.11.26 da problemi sull'ultima OpenSuse 
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
