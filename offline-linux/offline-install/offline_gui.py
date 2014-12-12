@@ -215,7 +215,7 @@ class OfflineInstall(object):
 	##
 	def check_filesystems(self):
 		parts = self.check_partitions(True)
-		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
+		fs = ['hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs', 'ufsd']
 		tablefs = []
 	
 		if parts == None:
@@ -230,18 +230,19 @@ class OfflineInstall(object):
 
 		for i in parts:
 			for j in fs:
-				os = None
+				opsy = None
 
 				try:
 					ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(j, i), shell=True)
 
-					if j == 'hfsplus':
-						os = 'os x'
+					if j == 'hfsplus' or j == 'ufsd':
+						if os.path.exists('/mnt/mach_kernel') == True or os.path.exists('/mnt/System/Library/Kernels/kernel') == True:
+							opsy = 'os x'
 					else:
-						os = 'linux'
+						opsy = 'linux'
 
-					print("  Found: " + os + " -> /dev/" + i + " -> " + j)
-					tablefs.append([os, i, j])
+					print("  Found: " + opsy + " -> /dev/" + i + " -> " + j)
+					tablefs.append([opsy, i, j])
 				except:
 					pass
 
@@ -250,7 +251,7 @@ class OfflineInstall(object):
 				except:
 					pass
 
-				if os != None:
+				if opsy != None:
 					break
 		
 		if tablefs == []:
@@ -893,7 +894,7 @@ class OfflineInstall(object):
 				if (i.find("sr") != -1 and len(i) == 3) or (i.find("sd") != -1 and len(i) == 4):
 					print("  Found: /dev/" + i)
 
-					fs = ['iso9660', 'vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
+					fs = ['iso9660', 'vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs', 'ufsd']
 					devfs = None
 
 					for j in fs:
@@ -3042,7 +3043,7 @@ class OfflineInstall(object):
 	##
 	def mount_devs(self):
 		parts = self.check_partitions(False)
-		fs = ['vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs']
+		fs = ['vfat', 'ntfs-3g', 'msdos', 'hfsplus', 'ext4', 'reiserfs', 'ext3', 'ext2', 'xfs', 'jfs', 'btrfs', 'ufsd']
 
 		print("Check drives on partitions to mount...")
 		

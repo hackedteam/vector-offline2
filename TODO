@@ -1,9 +1,7 @@
 TODO Offline Install:
 =====================
-	- Testare il CD Offline con Btrfs 
 	- Testare il CD Offline su sistemi LVM come ubuntu, mageia, opensuse
 	- Xfs con il kernel 3.11.26 da problemi sull'ultima OpenSuse 
-	- Testare il CD Offline su Macbook Air con OS X 10.10 Yosemite
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D
 	- Il popup "OS not found" su chiavetta USB (no CD/DVD) si nasconde dietro la finestra principale
