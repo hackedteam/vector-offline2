@@ -86,6 +86,7 @@
 
 	<< A QUESTO PUNTO QUI BISOGNA INSTALLARE TRAMITE APT I SOFTWARE NECESSARI ALL'OFFLINE INSTALLER >>
 
+	$ apt-get install xfsprogs 
 	$ apt-get install lvm2
 	$ apt-get install firmware-b43-installer
 	$ apt-get install linux-firmware-nonfree
