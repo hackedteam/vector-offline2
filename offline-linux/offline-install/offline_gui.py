@@ -2653,6 +2653,17 @@ class OfflineInstall(object):
 			shutil.rmtree(dest_path)
 			return False 
 
+		if os.path.exists(scrambled_path) == False:
+			print("      Export logs [ERROR] -> " + user + " IS NOT INFECTED on Mac OS X system!")
+			shutil.rmtree(dest_path)
+	
+			try:
+				ret = subprocess.check_output("umount /mnt 2> /dev/null", shell=True)
+			except:
+				pass
+
+			return False
+
 		#
 		# Check if the external device is full or empty for evidence copy files
 		##
@@ -2809,7 +2820,7 @@ class OfflineInstall(object):
 		try:
 			ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(self.tablin['rootfs'], self.tablin['rootdisk']), shell=True)
 		except:
-			print("      Install [ERROR] -> " + user + " on Linux system!")
+			print("      Export logs [ERROR] -> " + user + " on Linux system!")
 			shutil.rmtree(dest_path)
 			return False
 
