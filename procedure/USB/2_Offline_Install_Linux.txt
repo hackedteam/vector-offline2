@@ -9,13 +9,14 @@
 
 	SE AGGIORNA IL KERNEL, RIAVVIARE E POI SEGUIRE LA PROCEDURA DA QUI
 
-2) Installare i driver Paragon UFSD (testato fino a kernel 3.11.0-19-generic):
+2) Installare i driver Paragon UFSD (testato fino a kernel 3.13.0-43-generic):
 
 	$ mkdir ufsd
 	$ cd ufsd
-	$ tar -xvzf Paragon-147-FRE_NTFS_Linux_8.9.0_Express.tar.gz
+	$ tar -xvzf Paragon-147-FRE_NTFS_Linux_9.0_Express.tar.gz
+	$ cd Paragon-147-FRE_NTFS_Linux_9.0_Express/
 	$ sudo ./install.sh
-	$ cd ..
+	$ cd ../../
 
 	Per verificare la posizione dei file:
 
@@ -28,12 +29,12 @@
 	$ sudo apt-get install debootstrap
 	$ mkdir -p work/chroot
 	$ cd work
-	$ sudo debootstrap --arch=i386 saucy chroot
+	$ sudo debootstrap --arch=i386 trusty chroot
 
 		Esempio:
 
 		$ARCH = i386, amd64 
-		$RELEASE = saucy (13.10)
+		$RELEASE = trusty (14.04)
 
 		I nome delle release si trovano in /usr/share/debootstrap/scripts/
 
@@ -104,6 +105,7 @@
 	$ apt-get install gnome-humility-icon-theme
 	$ apt-get install fluxbox
 	$ apt-get install vim
+	$ apt-get install lightdm
 
 	$ echo "blacklist b43" | sudo tee -a /etc/modprobe.d/blacklist-b43.conf
 
@@ -162,23 +164,21 @@
 	MODIFICA LA LINEA:
 
 	start on (filesystem and static-network-up) or failsafe-boot
+	stop on runlevel
 
 	IN
 
 	start on (filesystem) or failsafe-boot
+	stop on runlevel [!0123456]
 
 	SALVA ED ESCI DAL FILE
 
 	MODIFICA IL FILE:
 
-	$ vi /etc/lightdm/lightdm.conf
+	$ touch /etc/lightdm/lightdm.conf
+	$ vim /etc/lightdm/lightdm.conf
 
-	DA:
-
-	[SeatDefaults]
-	greeter-session=lightdm-gtk-greeter
-
-	A:
+	INSERIRE:
 
 	[SeatDefaults]
 	autologin-user=offline
@@ -293,7 +293,7 @@
 	SOSTITUISCI:
 
 	start on (local-filesystems
-          and (stopped udevtrigger or container)) or runlevel [2345]
+	   and (stopped udevtrigger or container)) or runlevel [2345] or stopped networking RESULT=failed PROCESS=post-stop EXIT_STATUS=100
 	stop on unmounted-remote-filesystems
 
 	CON:
