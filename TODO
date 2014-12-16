@@ -1,5 +1,6 @@
 TODO Offline Install:
 =====================
+	- Aggiornare offline-install.tar.gz nella ISO
 	- Testare su imac e macbook air
 	- Testare il file system btrfs
 	- Testare il CD Offline su sistemi LVM come ubuntu, mageia, opensuse
