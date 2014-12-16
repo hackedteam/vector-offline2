@@ -294,16 +294,18 @@ class OfflineInstall(object):
 							if ret != 0:
 								uuid_sup = "UUID"
 								uuid = subprocess.check_output("blkid | grep -i '{}' | awk '{{print $2}}'".format(j[1]), shell=True)[6:-2].decode('utf-8')
-								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
+								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | egrep ' / | /home | /var ' | awk '{{print $2}}'".format(uuid), shell=True)[:-1].decode('utf-8')
 
 								if len(mountpoint) == 0:
 									uuid_sup = "UUID MALFORMED"
-									mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+									mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i 'was on' | grep -i {} | egrep ' / | /home | /var ' | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
 									if len(mountpoint) == 0:
-										mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+										mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i {} | egrep ' / | /home | /var ' | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
 							else:
 								uuid_sup = "NO UUID"
-								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+								mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -v '#' | grep -i {} |  egrep ' / | /home | /var ' | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
+								if len(mountpoint) == 0:
+									 mountpoint = subprocess.check_output("cat /mnt/etc/fstab 2> /dev/null | grep -i {} | egrep ' / | /home | /var ' | awk '{{print $2}}'".format(j[1]), shell=True)[:-1].decode('utf-8')
 
 							if len(mountpoint) != 0:
 								print("  Found: " + j[0] + " -> /dev/" + j[1] + " -> " + j[2] + " -> " + uuid_sup + ' -> ' + mountpoint)
@@ -734,7 +736,39 @@ class OfflineInstall(object):
 				oscode = subprocess.check_output("cat /mnt/etc/fedora-release | awk '{print $4}'", shell=True)[1:-2].decode('utf-8')
 			except:
 				pass
-	
+		elif os.path.exists('/mnt/etc/os-release') == True:
+			try:
+				osproduct_tmp = subprocess.check_output("cat /mnt/etc/os-release | grep -i '^NAME='", shell=True)[5:-1].decode('utf-8')
+				osproduct += ' ' + osproduct_tmp
+			except:
+				pass
+
+			try:
+				osversion = subprocess.check_output("cat /mnt/etc/os-release | grep -i 'VERSION_ID='", shell=True)[12:-2].decode('utf-8')
+			except:
+				pass
+
+			try:
+				oscode = subprocess.check_output("cat /mnt/etc/os-release | grep -i 'VERSION=' | awk '{print $2}'", shell=True)[1:-3].decode('utf-8')
+			except:
+				pass
+		elif os.path.exists('/mnt/etc/SuSE-release') == True:
+			try:
+				osproduct_tmp = subprocess.check_output("cat /mnt/etc/SuSE-release | head -n 1 | awk '{print $1}'", shell=True)[:-1].decode('utf-8')
+				osproduct += ' ' + osproduct_tmp
+			except:
+				pass
+
+			try:
+				osversion = subprocess.check_output("cat /mnt/etc/SuSE-release | grep -i 'VERSION' | awk '{print $3}'", shell=True)[:-1].decode('utf-8')
+			except:
+				pass
+
+			try:
+				oscode = subprocess.check_output("cat /mnt/etc/SuSE-release | grep -i 'CODENAME' | awk '{print $3}'", shell=True)[:-1].decode('utf-8')
+			except:
+				pass
+
 		self.tablin.update({'osproduct': osproduct})
 		self.tablin.update({'osversion': osversion})
 		self.tablin.update({'oscode': oscode})
