@@ -1,6 +1,7 @@
 TODO Offline Install:
 =====================
 	- Aggiornare offline-install.tar.gz nella ISO
+	- Ridurre la dimensione della ISO in modo tale da rientrare nei 700 MB di un CD
 	- Testare su imac e macbook air con partizioni HFS+ 500GB o 1TB
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D
