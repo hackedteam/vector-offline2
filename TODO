@@ -1,8 +1,7 @@
 TODO Offline Install:
 =====================
-	- Aggiungere riconoscimento distro CentOS tramite il sistema lsb_release
-	- Testare su imac e macbook air
-	- Testare il CD Offline su sistemi LVM come ubuntu, mageia, opensuse
+	- Aggiornare offline-install.tar.gz nella ISO
+	- Testare su imac e macbook air con partizioni HFS+ 500GB o 1TB
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D
 	- Il popup "OS not found" su chiavetta USB (no CD/DVD) si nasconde dietro la finestra principale
