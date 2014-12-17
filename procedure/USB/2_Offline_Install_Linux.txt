@@ -106,6 +106,10 @@
 	$ apt-get install fluxbox
 	$ apt-get install vim
 	$ apt-get install lightdm
+	$ apt-get install hfsplus
+	$ apt-get install hfsprogs
+	$ apt-get install hfsutils
+	$ depmod -a
 
 	$ echo "blacklist b43" | sudo tee -a /etc/modprobe.d/blacklist-b43.conf
 
