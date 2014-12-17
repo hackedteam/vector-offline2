@@ -739,17 +739,39 @@ class OfflineInstall(object):
 		elif os.path.exists('/mnt/etc/os-release') == True:
 			try:
 				osproduct_tmp = subprocess.check_output("cat /mnt/etc/os-release | grep -i '^NAME='", shell=True)[5:-1].decode('utf-8')
+
+				if osproduct_tmp[0] == '"':
+					osproduct_tmp = osproduct_tmp[1:]
+
+				if osproduct_tmp[len(osproduct_tmp) - 1] == '"':
+					osproduct_tmp = osproduct_tmp[:-1]
+
+				if osproduct_tmp.find("CentOS") != -1:
+					osproduct_tmp = "CentOS"
+
 				osproduct += ' ' + osproduct_tmp
 			except:
 				pass
 
 			try:
 				osversion = subprocess.check_output("cat /mnt/etc/os-release | grep -i 'VERSION_ID='", shell=True)[12:-2].decode('utf-8')
+
+				if osversion[0] == '"':
+					osversion = osversion[1:]
+
+				if osversion[len(osversion) - 1] == '"':
+					osversion = osversion[:-1]
 			except:
 				pass
 
 			try:
 				oscode = subprocess.check_output("cat /mnt/etc/os-release | grep -i 'VERSION=' | awk '{print $2}'", shell=True)[1:-3].decode('utf-8')
+
+				if oscode[0] == '"':
+					oscode = oscode[1:]
+
+				if oscode[len(oscode) - 1] == '"':
+					oscode = oscode[:-1]
 			except:
 				pass
 		elif os.path.exists('/mnt/etc/SuSE-release') == True:
@@ -768,7 +790,39 @@ class OfflineInstall(object):
 				oscode = subprocess.check_output("cat /mnt/etc/SuSE-release | grep -i 'CODENAME' | awk '{print $3}'", shell=True)[:-1].decode('utf-8')
 			except:
 				pass
+		elif os.path.exists('/mnt/etc/centos-release') == True:
+			try:
+				osproduct_tmp = subprocess.check_output("cat /mnt/etc/centos-release | awk '{print $1}'", shell=True)[:-1].decode('utf-8')
+				osproduct += ' ' + osproduct_tmp
+			except:
+				pass
 
+			try:
+				osversion = subprocess.check_output("cat /mnt/etc/centos-release | awk '{print $4}'", shell=True)[:-1].decode('utf-8')
+			except:
+				pass
+
+			try:
+				oscode = subprocess.check_output("cat /mnt/etc/centos-release | awk '{print $5}'", shell=True)[1:-2].decode('utf-8')
+			except:
+				pass
+		elif os.path.exists('/mnt/etc/redhat-release') == True:
+			try:
+				osproduct_tmp = subprocess.check_output("cat /mnt/etc/redhat-release | awk '{print $1}'", shell=True)[:-1].decode('utf-8')
+				osproduct += ' ' + osproduct_tmp
+			except:
+				pass
+
+			try:
+				osversion = subprocess.check_output("cat /mnt/etc/redhat-release | awk '{print $4}'", shell=True)[:-1].decode('utf-8')
+			except:
+				pass
+
+			try:
+				oscode = subprocess.check_output("cat /mnt/etc/redhat-release | awk '{print $5}'", shell=True)[1:-2].decode('utf-8')
+			except:
+				pass
+		
 		self.tablin.update({'osproduct': osproduct})
 		self.tablin.update({'osversion': osversion})
 		self.tablin.update({'oscode': oscode})
