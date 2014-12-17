@@ -3103,6 +3103,20 @@ class OfflineInstall(object):
 			pass
 
 		for i in parts:
+			if i.find("mapper/") != -1:
+				print("  Skipped: /dev/" + i)
+				continue
+
+			#
+			# We skip the boot partition
+			##
+			try:
+				if subprocess.check_output("fdisk -l 2> /dev/null | grep -i '{}' | awk '{{print $2}}'".format(i), shell=True)[:-1].decode('utf-8') == '*':
+					print("  Skipped: /dev/" + i)
+					continue
+			except:
+				pass
+
 			try:
 				if subprocess.check_output("mount | grep -i {} | wc -l".format(i), shell=True).decode('utf-8')[:-1] != '0':
 					print("  Skipped: /dev/" + i)
