@@ -236,13 +236,37 @@ class OfflineInstall(object):
 					ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(j, i), shell=True)
 
 					if j == 'hfsplus' or j == 'ufsd':
-						if os.path.exists('/mnt/mach_kernel') == True or os.path.exists('/mnt/System/Library/Kernels/kernel') == True:
-							opsy = 'os x'
+						opsy = 'os x'
 					else:
 						opsy = 'linux'
 
-					print("  Found: " + opsy + " -> /dev/" + i + " -> " + j)
-					tablefs.append([opsy, i, j])
+					if opsy == 'os x':
+						#
+				 		# Ufsd loads also the NTFS file system but we want only the HFS+ file system
+						##
+						try:
+							ret = subprocess.check_output("umount /mnt/ 2> /dev/null", shell=True)
+						except:
+							pass
+
+						ntfs = False
+
+						try:
+							ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format("ntfs-3g", i), shell=True)
+							ntfs = True
+						except:
+							pass
+
+						if ntfs == True:
+							opsy = None
+						else:
+							ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format(j, i), shell=True)
+
+							print("  Found: " + opsy + " -> /dev/" + i + " -> " + j)
+							tablefs.append([opsy, i, j])
+					else:
+						print("  Found: " + opsy + " -> /dev/" + i + " -> " + j)				
+						tablefs.append([opsy, i, j])
 				except:
 					pass
 
