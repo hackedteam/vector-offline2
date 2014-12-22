@@ -13,8 +13,8 @@
 
 	$ mkdir ufsd
 	$ cd ufsd
-	$ tar -xvzf Paragon-147-FRE_NTFS_Linux_9.0_Express.tar.gz
-	$ cd Paragon-147-FRE_NTFS_Linux_9.0_Express/
+	$ tar -xvzf Paragon-147-FRE_NTFS_Linux_9.0_Express-PATCHED.tar.gz
+	$ cd Paragon-147-FRE_NTFS_Linux_9.0_Express-PATCHED/
 	$ sudo ./install.sh
 	$ cd ../../
 

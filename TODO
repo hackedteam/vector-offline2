@@ -2,7 +2,6 @@ TODO Offline Install:
 =====================
 	- Su alcuni computer come Dell E6410 e Macbook air il reboot non riavvia ma spegne
 	- Ridurre la dimensione della ISO in modo tale da rientrare nei 700 MB di un CD
-	- Testare su imac e macbook air con partizioni HFS+ 500GB o 1TB
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D
 	- Il popup "OS not found" su chiavetta USB (no CD/DVD) si nasconde dietro la finestra principale
