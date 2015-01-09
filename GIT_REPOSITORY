@@ -1,0 +1,3 @@
+1) GIT OfflineInstall 
+
+	$ git clone -b devel git@rcs-dev.hackingteam.it:vector-offline2.git
