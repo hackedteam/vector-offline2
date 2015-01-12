@@ -1,7 +1,6 @@
 TODO Offline Install:
 =====================
 	- Capire quando su un Mac OS X la partizione di root e' cifrata e indicare il corretto messaggio sulla GUI
-	- Ridurre la dimensione della ISO in modo tale da rientrare nei 700 MB di un CD
 	- Testare il CD Offline su Mac con installazione Mac + Windows tramite bootcamp
 	- Testare il CD Offline su notebook con dischi SSD come ad esempio Samsung serie 9 modello NP900X3D
 	- Il popup "OS not found" su chiavetta USB (no CD/DVD) si nasconde dietro la finestra principale
