@@ -336,7 +336,7 @@ class OfflineInstall(object):
 								self.exslin = True
 								tablemount.append([j[0], j[1], j[2], mountpoint])
 
-						self.exslin = True
+					self.exslin = True
 			except:
 				pass
 
@@ -1481,7 +1481,7 @@ class OfflineInstall(object):
 				if self.licosx == False:
 					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Platform not available)")
 				elif self.useosx == None:
-					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Users not found)")
+					self.builder.get_object("label4").set_label("OS Version: Mac OS X (Users not found or disk is encrypted)")
 				else:
 					self.builder.get_object("label4").set_label("OS Version: Mac OS X (OS internal errors)")
 
@@ -1521,12 +1521,10 @@ class OfflineInstall(object):
 				self.builder.get_object("image1").set_from_file('/opt/offline-install/imagine/linux-off.bmp')
 				self.builder.get_object("label3").set_label("Computer Name: Unknown")
 
-				if self.crylin == True:
-					self.builder.get_object("label4").set_label("OS Version: Linux (Disk is encrypted)")
-				elif self.liclin == False:
+				if self.liclin == False:
 					self.builder.get_object("label4").set_label("OS Version: Linux (Platform not available)")
 				elif self.uselin == None:
-					self.builder.get_object("label4").set_label("OS Version: Linux (Users not found)")
+					self.builder.get_object("label4").set_label("OS Version: Linux (Users not found or disk is encrypted)")
 				else:
 					self.builder.get_object("label4").set_label("OS Version: Linux (OS internal errors)")
 
