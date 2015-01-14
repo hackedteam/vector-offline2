@@ -252,7 +252,7 @@ class OfflineInstall(object):
 						ntfs = False
 
 						try:
-							ret = subprocess.check_output("mount -t {} /dev/{} /mnt/ 2> /dev/null".format("ntfs-3g", i), shell=True)
+							ret = subprocess.check_output("mount -t {} -o ro /dev/{} /mnt/ 2> /dev/null".format("ntfs-3g", i), shell=True)
 							ntfs = True
 						except:
 							pass
