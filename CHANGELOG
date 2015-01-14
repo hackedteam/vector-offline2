@@ -4,7 +4,21 @@
 
 Offline Installer 9.6.0
 =======================
-	DA FARE
+	+ Supporto Bootcamp per sistemi operativi Windows ed OS X sui computer Apple
+	+ Supporto LVM o Logical Volume Manager per i sistemi Linux
+	+ Riconoscimento delle distribuzioni linux: Ubuntu, Debian, Mint, Mageia, OpenSuse, Fedora, Red Hat, CentOS
+	+ Aggiornato il sistema operativo di base dell'Offline ad ubuntu 14.04.1 LTS o trusty con kernel 3.13.0-43 
+	+ Aggiornato driver UFSD o Paragon HFS+ & NTFS alla versione 9.0
+	+ Aggiunti i pacchetti hfsplus, hfsprogs, hfsutils e xfsprogs di default
+	+ Aggiunto supporto partizioni Btrfs per sistemi operativi Linux
+	! Riconoscimento del block size per il montaggio corretto delle partizioni HFS+ tramite il driver UFSD
+	! Montaggio corretto delle partizioni XFS per sistema operativo Linux
+	! Riconoscimento del disco cifrato per sistema operativo OS X
+	! Riconoscimento della partizione di root per sistema operativo OS X
+	! Falso allarme nel riconoscimento del sistema operativo Windows come OS X
+	! Export logs nel caso di utenti non infettati per sistema operativo OS X
+	! Riconoscimento del sistema operativo OS X versione Yosemite
+	- Driver proprietario per schede NVIDIA che causava conflitto con EFI e il non boot su alcuni computer Apple	
 
 Offline Installer 9.4.0
 =======================
