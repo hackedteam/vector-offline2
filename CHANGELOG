@@ -7,7 +7,7 @@ Offline Installer 9.6.0
 	+ Supporto Bootcamp per sistemi operativi Windows ed OS X sui computer Apple
 	+ Supporto LVM o Logical Volume Manager per i sistemi Linux
 	+ Riconoscimento delle distribuzioni linux: Ubuntu, Debian, Mint, Mageia, OpenSuse, Fedora, Red Hat, CentOS
-	+ Aggiornato il sistema operativo di base dell'Offline ad ubuntu 14.04.1 LTS o trusty con kernel 3.13.0-43 
+	+ Aggiornato il sistema operativo di base dell'Offline ad ubuntu 14.04.1 LTS o trusty con kernel 3.13.0-44 
 	+ Aggiornato driver UFSD o Paragon HFS+ & NTFS alla versione 9.0
 	+ Aggiunti i pacchetti hfsplus, hfsprogs, hfsutils e xfsprogs di default
 	+ Aggiunto supporto partizioni Btrfs per sistemi operativi Linux
