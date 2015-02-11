@@ -18,6 +18,7 @@ Offline Installer 9.6.0
 	! Falso allarme nel riconoscimento del sistema operativo Windows come OS X
 	! Export logs nel caso di utenti non infettati per sistema operativo OS X
 	! Riconoscimento del sistema operativo OS X versione Yosemite
+	! Migliorati messaggi utente durante la scelta del sistema da infettare al boot
 	- Driver proprietario per schede NVIDIA che causava conflitto con EFI e il non boot su alcuni computer Apple	
 
 Offline Installer 9.4.0
