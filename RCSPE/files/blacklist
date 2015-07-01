@@ -1,15 +1,23 @@
-0|*|S|*|360杀毒
-0|*|S|*|360安全卫士
+0|*|B|*|360杀毒
+0|*|B|*|360安全卫士
 0|*|S|*|AdAware
+0|*|S|*|Ad-Aware
 0|*|S|*|AVG
+0|*|S|*|Avira
+0|*|S|*|Antivirus Pro
 0|*|S|*|Bitdefender
+0|*|B|*|BullGuard
+0|*|B|*|CMC
 0|*|S|*|Comodo
 0|*|S|*|Dr.Web
 0|*|B|*|Emsisoft
+0|*|S|*|F-Secure
 0|*|S|*|G Data
 0|*|S|*|IObit Malware Fighter
-0|*|S|32|Касперского
-0|*|S|32|Kaspersky
+0|*|B|32|Касперского
+0|*|B|32|Kaspersky
+0|*|S|*|Norman
 0|*|B|*|Online Armor
 0|*|B|*|Outpost
+0|*|S|*|Panda
 0|*|B|*|Sophos
