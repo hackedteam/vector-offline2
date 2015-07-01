@@ -1,0 +1,82 @@
+Procedura per creare lato RCS Server l'Offline con CD multiboot per Windows, OS X e Linux - USB boot solo per Windows
+=====================================================================================================================
+
+Struttura files offline.zip necessari al server:
+================================================
+
+	1) Fare riferimento all'offline.zip presente su rcs-dev -> share -> release -> sviluppo -> cores galileo
+
+Procedura CD Lato Server:
+=========================
+
+	1) Aprire cmd.exe e generare la ISO di Windows PE sul giusto percorso tramite il comando:
+
+		cd C:\Users\Andrea\Desktop\Offline_Installer\
+
+		bin\oscdimg.exe -n -bc:\Users\Andrea\Desktop\Offline_Installer\WinPE\fwfiles\etfsboot.com C:\Users\Andrea\Desktop\Offline_Installer\WinPE\media C:\Users\Andrea\Desktop\Offline_Installer\CD\images\offlineinstallwin.iso
+
+		N.B 1: Per oscdimg.exe, l'opzione -bc:\Users\Andrea\Desktop\Offline_Installer\WinPE\fwfiles\etfsboot.com va considerata cosi com'e'.
+		Se la partizione e' un altra rispetto C:, ad esempio D:, allora l'opzione diventa -bd:\percorso\Offline_Installer\WinPE\fwfiles\etfsboot.com
+
+		N.B 2: Se e' gia' presente la ISO di Windows PE, va sostituito il file C:\Users\Andrea\Desktop\Offline_Installer\CD\images\offlineinstallwin.iso.
+
+	2) Copiare RCSPE\ dentro C:\Users\Andrea\Desktop\Offline_Installer\CD\
+
+		N.B: Se e' gia' presente RCSPE va sostituito con quello nuovo.
+
+	3) Aprire cmd.exe e generare la ISO del CD Offline tramite il comando:
+
+		cd C:\Users\Andrea\Desktop\Offline_Installer\
+
+		bin\mkisofs.exe -R -J -b grldr -no-emul-boot -boot-load-size 4 -o offlineinstall.iso CD\
+
+		N.B: Se e' gia' presente la ISO del CD Offline, va sostituito il file c:\Users\Andrea\Desktop\Offline_Installer\offlineinstall.iso.
+
+	4) Dare offlineinstall.iso all'utente
+
+Procedura USB Lato Server:
+==========================
+
+	1) Andare su media\:
+
+		cd C:\Users\Andrea\Desktop\Offline_Installer\WinPE\media\
+
+	2) Copiare RCSPE\ dentro C:\Users\Andrea\Desktop\Offline_Installer\WinPE\media\
+
+		N.B: Se e' gia' presente RCSPE va sostituito con quello nuovo.
+
+	3) Creare uno zip del contenuto di media\ da dare all'utente.
+
+Procedura CD Lato Utente:
+=========================
+
+	1) Masterizzare la ISO generata dal server all'interno di un CD
+
+	2) Avviare l'infezione sul computer target tramite CD
+
+
+Procedura USB Lato Utente:
+==========================
+
+	1) Una volta generato lo zip di media\, aprire cmd.exe come amministratore
+
+	2) Eseguire: diskpart.exe
+
+	3) Individuare il numero disco relativo alla chiavetta USB tramite il comando di diskpart: 
+
+		list disk
+
+	4) Ad esempio da me la chiavetta USB e' il disco 1. Quindi eseguire i comandi di diskpart:
+
+		select disk 1
+		clean
+		create partition primary
+		select partition 1
+		active
+		format fs=fat32 quick label="Offline"
+		assign
+		exit
+
+	5) Copiare il contenuto dello zip generato dal server all'interno della chiavetta USB
+
+	6) Avviare l'infezione sul computer target tramite chiavetta USB
